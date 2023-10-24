@@ -41,5 +41,6 @@ jobs:
         key: ${{ secrets.AMAZON_SECRET_KEY }}
         script: |
           cd /home/ec2-user/app
-          docker rmi app-nginx
+          docker stop app-nginx
+          docker rmi -f app-nginx
           docker-compose up --no-deps --build -d nginx
