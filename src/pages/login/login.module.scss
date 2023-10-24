@@ -1,0 +1,26 @@
+
+.wrapper {
+  height: 100%;
+  width: 90%;
+  margin: 0 auto;
+}
+
+.login {
+  display: flex;
+  padding-top: 100px;
+  align-items: center;
+  justify-content: center;
+}
+
+.register {
+  text-align: center;
+  font-size: 13px;
+  cursor: pointer;
+
+  span {
+    color: #2179f9;
+  }
+}
+
+.login-form {
+}

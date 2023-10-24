@@ -1,0 +1,56 @@
+
+.hover {
+  z-index: 2;
+  display: none;
+  position: absolute;
+  background: #ff9a64;
+  width: 400px;
+  max-height: 400px;
+  overflow: auto;
+  cursor: pointer;
+  border-radius: 10px;
+  text-align: center;
+
+  .hoverItem {
+    border-radius: 10px;
+  }
+
+  h3 {
+    padding: 0;
+    margin: 0;
+  }
+
+  p {
+    padding: 15px 15px;
+    margin: 0;
+    text-align: left;
+    font-size: 15px;
+    line-height: 23px;
+  }
+}
+
+.translateText {
+  padding: 5px 5px;
+  p {
+    padding: 5px 20px !important;
+  }
+
+  h3, h4 {
+    text-align: left;
+    padding: 8px 10px !important;
+    margin: 0 !important;
+  }
+}
+.markArtical {
+  text-align: center;
+  box-sizing: border-box;
+  margin: 0 0;
+  color: #f11a1a;
+}
+
+.newWord {
+  text-align: center;
+  box-sizing: border-box;
+  margin: 0 10px;
+  color: #196904;
+}

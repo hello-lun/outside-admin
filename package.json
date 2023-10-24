@@ -1,0 +1,86 @@
+{
+  "name": "outside-admin",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@ant-design/icons": "^5.0.1",
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "@react-pdf-viewer/core": "^3.12.0",
+    "@react-pdf-viewer/default-layout": "^3.12.0",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/crypto-js": "^4.1.1",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.18.7",
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.9",
+    "antd": "^5.8.5",
+    "antd-mobile": "^5.28.1",
+    "antd-mobile-icons": "^0.3.0",
+    "axios": "^1.2.1",
+    "crypto-js": "^4.1.1",
+    "dayjs": "^1.11.9",
+    "history": "^5.3.0",
+    "immer": "^10.0.2",
+    "normalize.css": "^8.0.1",
+    "pdfjs-dist": "^3.9.179",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-pdf": "^7.3.3",
+    "react-redux": "^8.1.1",
+    "react-router-dom": "^6.6.1",
+    "react-scripts": "5.0.1",
+    "redux": "^4.2.1",
+    "redux-thunk": "^2.4.2",
+    "reflect-metadata": "^0.1.13",
+    "typescript": "^4.9.4",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "postbuild": "copyfiles Dockerfile ./build",
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "craco eject",
+    "prepare": "husky install"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@craco/craco": "^7.1.0",
+    "@types/jquery": "^3.5.16",
+    "@typescript-eslint/eslint-plugin": "^5.47.0",
+    "@typescript-eslint/parser": "^5.47.0",
+    "copyfiles": "^2.4.1",
+    "eslint": "^8.30.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-react": "^7.31.11",
+    "husky": "^8.0.2",
+    "lint-staged": "^13.1.0",
+    "postcss-px-to-viewport-8-plugin": "^1.2.0",
+    "prettier": "^2.8.1",
+    "redux-devtools-extension": "^2.13.9",
+    "sass": "^1.60.0",
+    "vconsole": "^3.15.1"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,css,md}": [
+      "prettier --write"
+    ],
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix"
+    ]
+  }
+}

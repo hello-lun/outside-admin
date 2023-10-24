@@ -1,0 +1,70 @@
+
+.newWordWrapper {
+  white-space: pre-line;
+  padding: 20px 20px;
+  width: 100%;
+  text-align: left;
+  box-sizing: border-box;
+  background-color: #a3dffa;
+  max-height: 100%;
+  overflow: auto;
+  font-size: 15px;
+
+  h3 {
+    margin: 0;
+  }
+}
+
+.newWordItemWrapper {
+  :global {
+    .anticon {
+      font-size: 13px;
+      float: right;
+      cursor: pointer;
+      display: none;
+    }
+  }
+  p {
+    margin: 5px 0;
+  }
+}
+
+.newWordItemText {
+  font-size: 13px;
+  color: blue;
+  margin-left: 10px !important;
+}
+
+.editNewWord {
+  margin: 0 5px;
+  color: #196904;
+}
+
+.newWordItemTitle {
+  &:hover {
+    :global {
+      .anticon {
+        display: block;
+      }
+    }
+  }
+}
+
+.newWordMode {
+  font-size: 13px;
+  float: right;
+  margin-top: 3px;
+  color: blue;
+  cursor: pointer;
+}
+
+
+.speakWord {
+  margin-left: 5px;
+  font-size: 15x;
+  cursor: pointer;
+
+  :hover {
+    color: green;
+  }
+}

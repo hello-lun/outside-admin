@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "@redux-modules/*": ["src/redux/modules/*"],
+      "@assets": ["src/assets/*"],
+      "@components": ["src/components/*"],
+      "@routes": ["src/routes/*"],
+      "@service": ["src/service/*"],
+      "@types": ["src/types/*"],
+      "@utils": ["src/utils/*"],
+    },
+    "target": "es5",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": false,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "experimentalDecorators": true
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": ["node_modules/**/*"]
+}

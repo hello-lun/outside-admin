@@ -1,0 +1,19 @@
+<script>
+  const text = "about [ə'baʊt] 关于；大约  around \n[ə 'raʊ nd] 到处；在...附近  simplify ['sɪmplɪfaɪ] 简化   justify \n['dʒʌstɪfaɪ] 证明  purify ['pjʊərɪfaɪ] 净化  pure [pjʊə(r)] 纯的；纯\n洁的 。";
+
+// Split the string using multiple spaces as delimiter
+const parts = text.split(/\s{2,}/);
+
+// Merge the word entries with their respective pronunciation and meaning
+const result = [];
+for (let i = 0; i < parts.length; i++) {
+    if (parts[i].startsWith('[')) {
+        result[result.length - 1] += ' ' + parts[i];
+    } else {
+        result.push(parts[i]);
+    }
+}
+
+console.log(result);
+
+</script>

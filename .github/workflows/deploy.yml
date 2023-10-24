@@ -1,0 +1,45 @@
+name: Deploy to EC2
+on:
+  push:
+    branches:
+      - master  # adjust this to your main branch if it's named differently
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16  # adjust this to your project's node version
+    
+    - name: Install dependencies and build
+      run: |
+        echo "file: ${{ vars.EC2_NEXTJS_SOURCE }}"
+        npm i pnpm -g
+        pnpm i
+        npm run build
+
+    - name: Copy files to EC2
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.AMAZON_EC2_HOST }}
+        username: ${{ secrets.AMAZON_EC2_NAME }}
+        key: ${{ secrets.AMAZON_SECRET_KEY }}
+        source: build # 需要上传的文件
+        target: '/home/ec2-user/app/frontend'
+
+    - name: shell EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.AMAZON_EC2_HOST }}
+        username: ${{ secrets.AMAZON_EC2_NAME }}
+        key: ${{ secrets.AMAZON_SECRET_KEY }}
+        script: |
+          cd /home/ec2-user/app
+          docker rmi app-nginx
+          docker-compose up --no-deps --build -d nginx
