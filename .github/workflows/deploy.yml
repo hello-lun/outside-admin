@@ -19,10 +19,9 @@ jobs:
     
     - name: Install dependencies and build
       run: |
-        echo "file: ${{ vars.EC2_NEXTJS_SOURCE }}"
         npm i pnpm -g
         pnpm i
-        npm run build
+        SERVICE_HOST=${{ vars.SERVICE_HOST }} npm run build
 
     - name: Copy files to EC2
       uses: appleboy/scp-action@master
