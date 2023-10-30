@@ -1,6 +1,5 @@
 import React, { useState, startTransition } from 'react';
 import { Col, Row } from 'antd';
-import { connect } from 'react-redux';
 import styles from './header.module.scss';
 import { UnorderedListOutlined, WhatsAppOutlined } from '@ant-design/icons';
 import Logo from '@/assets/logo.png';
@@ -9,6 +8,7 @@ import type { MenuProps } from 'antd';
 import { Dropdown } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { doLogout } from '@/utils/logout';
+import { useUserStore } from '@/store/user';
 
 const drawDownItems: MenuProps['items'] = [
   {
@@ -72,8 +72,8 @@ const items = [
   }
 ];
 
-const Header: React.FC = (props: any) => {
-  const { userInfo } = props;
+const Header: React.FC = () => {
+  const userData = useUserStore((state) => state.user);
   const navigate = useNavigate();
   const [currentMenu, setCurrentMenu] = useState('home');
 
@@ -131,9 +131,9 @@ const Header: React.FC = (props: any) => {
 
             <Col className={styles.menu}>
               <div className={styles['sign-up']}>
-                {userInfo.id ? (
+                {userData.id ? (
                   <p onClick={() => login('login')}>
-                    <span>{userInfo.username}</span>
+                    <span>{userData.currentUser.username}</span>
                   </p>
                 ) : (
                   <p>
@@ -150,4 +150,4 @@ const Header: React.FC = (props: any) => {
   );
 };
 
-export default connect((state: any) => ({ userInfo: state.user }))(Header);
+export default Header;

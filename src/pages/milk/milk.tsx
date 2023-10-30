@@ -12,9 +12,9 @@ interface MilkType {
   id: number
   milk: string
   stage: number
-  salePrice: number
-  realPrice: number
-  courierFee: number
+  saleprice: number
+  realprice: number
+  courierfee: number
 }
 
 const Goods: React.FunctionComponent = () => {
@@ -25,9 +25,9 @@ const Goods: React.FunctionComponent = () => {
     id: 0,
     milk: '',
     stage: 1,
-    salePrice: 0,
-    realPrice: 0,
-    courierFee: 0,
+    saleprice: 0,
+    realprice: 0,
+    courierfee: 0,
   });
 
   const columns = [
@@ -48,22 +48,22 @@ const Goods: React.FunctionComponent = () => {
     },
     {
       title: '快递费',
-      dataIndex: 'courierFee',
-      key: 'courierFee',
+      dataIndex: 'courierfee',
+      key: 'courierfee',
     },
     {
       title: () => {
         return '原价' + '（$澳刀）'
       },
-      dataIndex: 'realPrice',
-      key: 'realPrice',
+      dataIndex: 'realprice',
+      key: 'realprice',
     },
     {
       title: () => {
         return '卖价' + '（人民币）'
       },
-      key: 'salePrice',
-      dataIndex: 'salePrice',
+      key: 'saleprice',
+      dataIndex: 'saleprice',
     },
     {
       title: 'operation',
@@ -177,7 +177,7 @@ const Goods: React.FunctionComponent = () => {
         <Row gutter={16}>
           <Col span={12}>
             <Form.Item
-              name="salePrice"
+              name="saleprice"
               label="奶粉卖价"
               rules={[{ required: true, message: '请输入奶粉卖价' }]}
             >
@@ -190,7 +190,7 @@ const Goods: React.FunctionComponent = () => {
           </Col>
           <Col span={12}>
             <Form.Item
-              name="realPrice"
+              name="realprice"
               label="奶粉原价"
               rules={[{ required: true, message: '请输入奶粉原价' }]}
             >
@@ -205,7 +205,7 @@ const Goods: React.FunctionComponent = () => {
         <Row gutter={16}>
           <Col span={12}>
             <Form.Item
-              name="courierFee"
+              name="courierfee"
               label="快递费"
               rules={[{ required: true, message: '请输入快递费' }]}
             >

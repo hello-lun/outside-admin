@@ -41,7 +41,7 @@ const NewWord: React.FunctionComponent<NewWordProps> = (props) => {
       (item as HTMLElement).style.color = '';
     });
 
-    const list = props.data.map(item => {
+    const list = props.data?.map(item => {
       return item.split('#')[0].split('：')[0];
     });
 
@@ -109,9 +109,9 @@ const NewWord: React.FunctionComponent<NewWordProps> = (props) => {
       </span>
     </h3>
     <div>
-      {props.data.map((item: string, key: number) => {
+      {props.data?.map((item: string, key: number) => {
         const textList = item.split('#');
-        const ding = textList.map((pText: string, index: number) => {
+        const ding = textList?.map((pText: string, index: number) => {
           if (index === 0)
             return (
               <p className={`${styles.newWordItemTitle}`} key={index} onClick={e => newWordClick(e, pText)}>

@@ -1,15 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { Button, FormInstance, Form, Input } from 'antd';
-import { connect } from 'react-redux';
-import { setUserInfo } from '@redux-modules/user/actions';
 import styles from './login.module.scss';
 import { login, IUserInfo } from '@/service/auth';
 import { useNavigate } from 'react-router-dom';
 import { useOnceEffect, useIsLogin } from '@/hooks/onceEffect';
+import { useUserStore } from '@/store/user';
 
-const Login: React.FC = ({ setUserInfo }: any) => {
+const Login: React.FC = () => {
   const navigate = useNavigate();
   const formRef = useRef<FormInstance>(null);
+  const updateUser = useUserStore.use.updateUser();
 
   useIsLogin(() => navigate('/'));
 
@@ -20,7 +20,7 @@ const Login: React.FC = ({ setUserInfo }: any) => {
   const onFinish = (values: IUserInfo) => {
     login(values)
       .then((data: any) => {
-        setUserInfo(data);
+        updateUser(data);
         navigate('/artical');
       })
       .catch(err => {
@@ -34,7 +34,7 @@ const Login: React.FC = ({ setUserInfo }: any) => {
 
   const autoLogin = () => {
     formRef.current && formRef.current.setFieldsValue({
-      username: 'admin',
+      username: 'java1234',
       password: '123456'
     });
   }
@@ -74,6 +74,4 @@ const Login: React.FC = ({ setUserInfo }: any) => {
   );
 };
 
-export default connect((state: any) => ({ userInfo: state.user }), {
-  setUserInfo
-})(Login);
+export default Login;

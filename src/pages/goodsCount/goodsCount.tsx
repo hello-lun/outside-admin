@@ -3,7 +3,7 @@ import React, { useEffect, useId, useState } from 'react';
 import { Space, Table, FormInstance, DatePicker, Button, Drawer, Form, Col, Typography, Input, Row, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { milkList, stageList } from '../milk/configs';
-import { editGoodsOrder, addGoodsOrder, getAllMilk, getAllGoodsOrder, getAllGoodsOrder1, removeGoodsOrder } from '@/service/milk';
+import { editGoodsOrder, addGoodsOrder, getAllMilk, getAllGoodsOrder, removeGoodsOrder } from '@/service/milk';
 import styles from './goodsCount.module.scss';
 import { PlusCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -19,8 +19,8 @@ interface MilkType {
   discount: number
   milkCount: number
   date: string
-  milkOrderList: any[]
-  extraOrderList: any[]
+  milkorderlist: any[]
+  extraorderlist: any[]
 }
 
 const Goods: React.FunctionComponent = () => {
@@ -39,8 +39,8 @@ const Goods: React.FunctionComponent = () => {
     discount: 0,
     milkCount: 0,
     date: '',
-    milkOrderList: [],
-    extraOrderList: []
+    milkorderlist: [],
+    extraorderlist: []
   });
   
   useEffect(() => {
@@ -53,8 +53,8 @@ const Goods: React.FunctionComponent = () => {
       discount: formData.discount,
       total: formData.total,
       date: formData.date ? dayjs(formData.date) : dayjs(),
-      milkOrderList: formData.milkOrderList,
-      extraOrderList: formData.extraOrderList,
+      milkorderlist: formData.milkorderlist,
+      extraorderlist: formData.extraorderlist,
     });
   }, [open]);
 
@@ -62,8 +62,8 @@ const Goods: React.FunctionComponent = () => {
     total: '',
     discount: '3.5',
     date: dayjs(),
-    extraOrderList: [],
-    milkOrderList: [
+    extraorderlist: [],
+    milkorderlist: [
       {
         milk: 'aptamil',
         stage: '2',
@@ -172,12 +172,13 @@ const Goods: React.FunctionComponent = () => {
   ];
 
   const formatData = async (data: any) => {
-    await getAllGoodsOrder1(data);
     const list: any = await getAllGoodsOrder(data);
     const dataList = list.map((item: any, key: number) => {
-      const milkCount = item.milkOrderList.reduce((tot: number, ele: any) => tot + ele.count, 0);
-      const allMilkCount = item.extraOrderList.reduce((tot: number, ele: any) => tot + ele.count, milkCount);
-      return {...item, milkCount: allMilkCount, key, milkOrderList: item.milkOrderList.map((ele: any, index: number) => ({...ele, key: index}))};
+      const tempMilkOrderList = item.milkorderlist ? JSON.parse(item.milkorderlist) : [];
+      const milkCount = tempMilkOrderList.reduce((tot: number, ele: any) => tot + ele.count, 0);
+      const tempExtraOrderList = item.extraorderlist ? JSON.parse(item.extraorderlist) : [];
+      const allMilkCount = tempExtraOrderList.reduce((tot: number, ele: any) => tot + ele.count, milkCount);
+      return {...item, milkCount: allMilkCount, key, extraorderlist: tempExtraOrderList, milkorderlist: tempMilkOrderList.map((ele: any, index: number) => ({...ele, key: index}))};
     });
     setGoodsOrderData(dataList);
   }
@@ -190,6 +191,8 @@ const Goods: React.FunctionComponent = () => {
       await api({
         id: curRowId,
         ...data,
+        milkorderlist: JSON.stringify(data.milkorderlist),
+        extraorderlist: JSON.stringify(data.extraorderlist),
         total: Number(data.total),
         discount: Number(data.discount),
         date: dayjs(data.date).format('YYYY-MM-DD'),
@@ -216,13 +219,13 @@ const Goods: React.FunctionComponent = () => {
   }
 
   const handleChangeMilkSelect = (index: number, val: any) => {
-    const fieldName = ['milkOrderList', index, 'milk'];
+    const fieldName = ['milkorderlist', index, 'milk'];
     formRef.current?.setFieldsValue({ [fieldName.join('.')]: val });
   }
 
 
   const handleChangeStageSelect = (index: number, val: any) => {
-    const fieldName = ['milkOrderList', index, 'stage'];
+    const fieldName = ['milkorderlist', index, 'stage'];
     formRef.current?.setFieldsValue({ [fieldName.join('.')]: val });
   }
 
@@ -251,7 +254,7 @@ const Goods: React.FunctionComponent = () => {
       milk: 'aptamil',
       stage: '2',
       count: '2',
-    }, 'milkOrderList');
+    }, 'milkorderlist');
   }
 
   const extraAdd = () => {
@@ -259,7 +262,7 @@ const Goods: React.FunctionComponent = () => {
       product: '',
       salePrice: null,
       courierFee: null,
-    }, 'extraOrderList');
+    }, 'extraorderlist');
   }
   
   return <div className={styles.wrapper}>
@@ -324,18 +327,18 @@ const Goods: React.FunctionComponent = () => {
             }
             return <ul className={styles.ulWrapper}>
               {
-                record?.milkOrderList?.map((item: any, key: number) => {
+                record?.milkorderlist?.map((item: any, key: number) => {
                   return <li key={key}>{`${formatTitle(item.milk)} - ${item.stage}段：${item.count}罐`}</li>
                 })
               }
               {
-                record?.extraOrderList?.map((item: any, key: number) => {
+                record?.extraorderlist?.map((item: any, key: number) => {
                   return <li key={key}>{`${item.product} - ${item.count}个：售价${item.salePrice}元，快递费：${item.courierFee}刀`}</li>
                 })
               }
             </ul>
           },
-          rowExpandable: (record: any) => record?.milkOrderList?.length || record?.extraOrderList?.length,
+          rowExpandable: (record: any) => record?.milkorderlist?.length || record?.extraorderlist?.length,
         }} />
     </div>
     <Drawer
@@ -396,7 +399,7 @@ const Goods: React.FunctionComponent = () => {
             <span style={{marginLeft: '15px'}}><PlusCircleOutlined onClick={milkAdd}></PlusCircleOutlined></span>
           </h3>
           <Form.List
-            name="milkOrderList">
+            name="milkorderlist">
             {
               (fields, { add, remove }, { errors }) => (
                 <>
@@ -468,7 +471,7 @@ const Goods: React.FunctionComponent = () => {
             <span style={{marginLeft: '15px'}}><PlusCircleOutlined onClick={extraAdd}></PlusCircleOutlined></span>
           </h3>
           <Form.List
-            name="extraOrderList">
+            name="extraorderlist">
             {
               (fields, { add, remove }, { errors }) => (
                 <>

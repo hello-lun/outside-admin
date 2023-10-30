@@ -1,20 +1,19 @@
 import React, { lazy, useEffect, useState } from 'react';
-import { connect } from 'react-redux';
 import { RouteObject, useNavigate } from 'react-router-dom';
 import lazyWrapper from '../components/lazyWrapper';
 import AuthWrapper from './authWrapper';
 
-const About = lazy(() => import('../pages/about'));
-const Hello = lazy(() => import('../pages/hello'));
-const Home = lazy(() => import('../pages/home'));
-const Login = lazy(() => import('../pages/login/login'));
-const Register = lazy(() => import('../pages/register/register'));
-const Test = lazy(() => import('../pages/test/test'));
-const Word = lazy(() => import('../pages/word/word'));
-const Artical = lazy(() => import('../pages/artical/artical'));
-const Novel = lazy(() => import('../pages/novel/novel'));
-const Milk = lazy(() => import('../pages/milk/milk'));
-const GoodsCount = lazy(() => import('../pages/goodsCount/goodsCount'));
+const About = () => import('../pages/about');
+const Hello = () => import('../pages/hello');
+const Home = () => import('../pages/home');
+const Login = () => import('../pages/login/login');
+const Register = () => import('../pages/register/register');
+const Test = () => import('../pages/test/test');
+const Word = () => import('../pages/word/word');
+const Artical = () => import('../pages/artical/artical');
+const Novel = () => import('../pages/novel/novel');
+const Milk = () => import('../pages/milk/milk');
+const GoodsCount = () => import('../pages/goodsCount/goodsCount');
 
 // interface IPageItem {
 //     path: string;
@@ -28,7 +27,7 @@ type IRouteObject = RouteObject & {
 const routerConfigs: Array<IRouteObject> = [
   {
     path: '/',
-    element: lazyWrapper(<Home />),
+    element: lazyWrapper(Home),
     auth: false,
     children: [
       {
@@ -38,7 +37,7 @@ const routerConfigs: Array<IRouteObject> = [
       },
       {
         path: '/about',
-        element: lazyWrapper(<About id='121' name='sds' />),
+        element: lazyWrapper(About),
         children: [
           {
             path: 'hello',
@@ -48,57 +47,61 @@ const routerConfigs: Array<IRouteObject> = [
       },
       {
         path: '/hello',
-        element: lazyWrapper(<Hello />)
+        element: lazyWrapper(Hello)
       }
     ]
   },
   {
     path: '/login',
-    element: lazyWrapper(<Login />),
+    element: lazyWrapper(Login),
     children: [],
     auth: false
   },
   {
     path: '/register',
-    element: lazyWrapper(<Register />),
+    element: lazyWrapper(Register),
     children: [],
     auth: false
   },
   {
     path: '/test',
-    element: lazyWrapper(<Test />),
+    element: lazyWrapper(Test),
     children: [],
     auth: false
   },
   {
     path: '/milk',
-    element: lazyWrapper(<Milk />),
+    element: lazyWrapper(Milk),
     children: [],
     auth: false
   },
   {
     path: '/word',
-    element: lazyWrapper(<Word />),
+    element: lazyWrapper(Word),
     children: [],
     auth: false
   },
   {
     path: '/goodsCount',
-    element: lazyWrapper(<GoodsCount />),
+    element: lazyWrapper(GoodsCount),
     children: [],
     auth: false
   },
   {
     path: '/novel',
-    element: lazyWrapper(<Novel />),
+    element: lazyWrapper(Novel),
     children: [],
     auth: false
   },
   {
     path: '/artical',
-    element: lazyWrapper(<Artical />),
+    element: lazyWrapper(Artical),
     children: [],
     auth: false
+  },
+  {
+    path: '*',
+    element: <h1>404</h1>,
   }
 ];
 

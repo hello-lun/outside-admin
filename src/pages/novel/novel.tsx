@@ -10,7 +10,6 @@ import 'react-pdf/dist/esm/Page/TextLayer.css';
 import styles from './novel.module.scss';
 import { Pagination, Button, Input, Select, Space, Col, Row } from 'antd';
 import { useOnceEffect } from '@/hooks/onceEffect';
-import { getArticals, saveArtical } from '../../service/translate';
 import { useNavigate } from 'react-router-dom';
 import { articalTypes, ArticalTypeEnum } from './configs';
 import TranslateLayer from '@/components/translateLayer/translateLayer';
@@ -47,7 +46,7 @@ export default function Artical() {
 
   function getNovelMarkHandler() {
     getNovelMark({id: 7}).then((res: any) => {
-      allNovelMarkData.current = res[0]?.words ? JSON.parse(res[0]?.words) : []
+      allNovelMarkData.current = res?.words ? JSON.parse(res?.words) : []
       setCurWordFn();
     });
   }

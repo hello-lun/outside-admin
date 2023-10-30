@@ -10,7 +10,7 @@ export interface IUserInfo {
 export const getUserInfo = (data: IUserInfo) => {
   return http<IUserInfo>({
     method: 'get',
-    url: '/user/getUserInfo',
+    url: '/article/getUserInfo',
     data
   },);
 };

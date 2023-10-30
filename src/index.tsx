@@ -5,10 +5,8 @@
 // // 记住当前页面
 import React from 'react';
 import { ConfigProvider } from 'antd';
-import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import ReactDOM from 'react-dom/client';
-import store from '@/redux';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import zhCN from 'antd/locale/zh_CN';
@@ -16,7 +14,6 @@ import Vconsole from 'vconsole'
 
 import './index.css';
 import 'normalize.css';
-import './utils/helper';
 
 const vConsole = new Vconsole();
 
@@ -25,9 +22,7 @@ root.render(
   <ConfigProvider locale={zhCN}>
     <React.StrictMode>
       <BrowserRouter>
-        <Provider store={store}>
-          <App />
-        </Provider>
+        <App />
       </BrowserRouter>
     </React.StrictMode>
   </ConfigProvider>

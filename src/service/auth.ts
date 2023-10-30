@@ -10,7 +10,7 @@ export interface IUserInfo {
 export const login = (data: IUserInfo) => {
   return http<IUserInfo>({
     method: 'post',
-    url: '/auth/login', 
+    url: '/login', 
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     },
@@ -22,7 +22,7 @@ export const login = (data: IUserInfo) => {
 export const logout = () => {
   return http<IUserInfo>({
     method: 'post',
-    url: '/auth/logout', 
+    url: '/logout', 
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
     },

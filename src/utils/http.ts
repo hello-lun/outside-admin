@@ -3,11 +3,11 @@ import axios, {
   AxiosRequestConfig, 
   AxiosResponse
 } from 'axios';
-import { removeUserInfo } from '@redux-modules/user/actions';
-import store from '@/redux';
+import { useUserStore } from '@/store/user';
 
 axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 axios.defaults.headers.head['Content-Type'] = 'application/json;chartset=utf-8';
+// axios.defaults.headers.head['token'] = 'eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJqYXZhMTIzNCIsInN1YiI6ImphdmExMjM0IiwiaXNzIjoiY29tbWVyY2UiLCJpYXQiOjE2OTg1ODQ2NzUsImV4cCI6MTY5ODU4ODI3NX0.7h0dB-WY1X1soDXAnWifiGrJ7jsmFw-wjhrXoMljhHI';
 axios.defaults.withCredentials = true;
 export interface IResponse<T = any> {
   code: number;
@@ -22,6 +22,10 @@ const axiosInstance: AxiosInstance = axios.create({
 // 请求拦截器
 axiosInstance.interceptors.request.use(
   (config: AxiosRequestConfig) => {
+    if(config.headers) {
+      const userData = useUserStore.getState();
+      config.headers['token'] = userData.user.authorization || localStorage.getItem('user_token_data');  // 在此处将token添加到header
+    }
     // 可以添加请求头、认证信息等
     config.url = `/api${config.url}`; // 添加接口前缀 "/api"
     return config;
@@ -35,6 +39,7 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (res: AxiosResponse) => {
     const { data } = res;
+    console.log('data: ', data);
     if (data.code === 500) {
       return Promise.reject(data);
     }
@@ -45,7 +50,8 @@ axiosInstance.interceptors.response.use(
       response: { status }
     } = err;
     if (status === 401 || status === 403) {
-      store.dispatch(removeUserInfo(''));
+      useUserStore.getState().removeUser();
+      useUserStore.use.removeUser()();
       window.location.href = '/login';
     }
     return Promise.reject(err.response.data);

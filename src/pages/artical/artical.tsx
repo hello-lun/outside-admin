@@ -109,10 +109,10 @@ export default function Artical() {
   function updateNewWords(data: object) {
     const tempData = allArtical.current?.[curPageNum.current];
     if (tempData.id) {
-      tempData.words = JSON.stringify(data);
       saveArtical({
         id: tempData.id,
-        ...data
+        ...data,
+        words: JSON.stringify(data)
       });
     }
   }

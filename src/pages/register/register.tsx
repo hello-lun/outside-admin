@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import { Button, Checkbox, Form, Input } from 'antd';
-import { connect } from 'react-redux';
-import { setUserInfo } from '@redux-modules/user/actions';
 import styles from './register.module.scss';
 import { login, IUserInfo } from '@/service/auth';
 import { useNavigate } from 'react-router-dom';
 import { useOnceEffect, useIsLogin } from '@/hooks/onceEffect';
+import { useUserStore } from '@/store/user';
 
-const Login: React.FC = ({ setUserInfo }: any) => {
+const Register: React.FC = () => {
   const navigate = useNavigate();
+  const updateUser = useUserStore((state) => state.updateUser);
 
   useIsLogin(() => navigate('/'));
 
@@ -19,7 +19,7 @@ const Login: React.FC = ({ setUserInfo }: any) => {
   const onFinish = (values: IUserInfo) => {
     login(values)
       .then((data: any) => {
-        setUserInfo(data);
+        updateUser(data);
         navigate('/');
       })
       .catch(err => {
@@ -75,6 +75,4 @@ const Login: React.FC = ({ setUserInfo }: any) => {
   );
 };
 
-export default connect((state: any) => ({ userInfo: state.user }), {
-  setUserInfo
-})(Login);
+export default Register;

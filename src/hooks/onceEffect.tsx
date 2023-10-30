@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useUserStore } from '@/store/user';
 
 type MyCallbackType = () => void;
 
@@ -19,10 +20,8 @@ type ILoginCB = (() => void) | null;
 
 export const useIsLogin = (isLoginCB?: ILoginCB, notLoginCB?: ILoginCB) => {
   useOnceEffect(() => {
-    const storedObject = localStorage.getItem('userInfo');
-    const parsedObject = storedObject ? JSON.parse(storedObject) : {};
-
-    if (parsedObject.username) {
+    const userData = useUserStore.getState();
+    if (userData.user.authorization) {
       isLoginCB && isLoginCB();
     } else {
       notLoginCB && notLoginCB();

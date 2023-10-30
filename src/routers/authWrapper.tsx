@@ -1,14 +1,6 @@
 import React, { ReactNode } from 'react';
-import { connect } from 'react-redux';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useOnceEffect, useIsLogin } from '@/hooks/onceEffect';
-
-interface MyComponentProps {
-  userInfo: {
-    username: string;
-  };
-  component: ReactNode;
-}
 
 const Auth: React.FC<any> = props => {
   const navigate = useNavigate();
@@ -17,6 +9,6 @@ const Auth: React.FC<any> = props => {
   return props.component;
 };
 
-const AuthRouterWrapper = connect((state: any) => ({ userInfo: state.user }), {})(Auth);
+const AuthRouterWrapper = Auth;
 
 export default AuthRouterWrapper;
