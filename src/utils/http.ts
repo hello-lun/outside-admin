@@ -38,7 +38,6 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (res: AxiosResponse) => {
     const { data } = res;
-    console.log('data: ', data);
     if (data.code === 500) {
       return Promise.reject(data);
     }
@@ -50,7 +49,6 @@ axiosInstance.interceptors.response.use(
     } = err;
     if (status === 401 || status === 403) {
       useUserStore.getState().removeUser();
-      useUserStore.use.removeUser()();
       window.location.href = '/login';
     }
     return Promise.reject(err.response.data);
