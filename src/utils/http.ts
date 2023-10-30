@@ -7,8 +7,7 @@ import { useUserStore } from '@/store/user';
 
 axios.defaults.baseURL = process.env.REACT_APP_API_URL;
 axios.defaults.headers.head['Content-Type'] = 'application/json;chartset=utf-8';
-// axios.defaults.headers.head['token'] = 'eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJqYXZhMTIzNCIsInN1YiI6ImphdmExMjM0IiwiaXNzIjoiY29tbWVyY2UiLCJpYXQiOjE2OTg1ODQ2NzUsImV4cCI6MTY5ODU4ODI3NX0.7h0dB-WY1X1soDXAnWifiGrJ7jsmFw-wjhrXoMljhHI';
-axios.defaults.withCredentials = true;
+// axios.defaults.withCredentials = true;
 export interface IResponse<T = any> {
   code: number;
   message: string;
