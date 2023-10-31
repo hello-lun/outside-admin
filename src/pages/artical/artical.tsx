@@ -96,7 +96,7 @@ export default function Artical() {
         text: filterHtml(curData?.text),
         title: curData?.title
       });
-      setNewWords(curData?.words ? JSON.parse(curData?.words) : []);
+      setNewWords(curData?.words ? JSON.parse(curData?.words).words : []);
     }).finally(() => {
       setSpinning(false);
     });

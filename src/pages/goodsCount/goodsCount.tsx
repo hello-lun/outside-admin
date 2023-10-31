@@ -177,7 +177,7 @@ const Goods: React.FunctionComponent = () => {
       const tempMilkOrderList = item.milkorderlist ? JSON.parse(item.milkorderlist) : [];
       const milkCount = tempMilkOrderList.reduce((tot: number, ele: any) => tot + ele.count, 0);
       const tempExtraOrderList = item.extraorderlist ? JSON.parse(item.extraorderlist) : [];
-      const allMilkCount = tempExtraOrderList.reduce((tot: number, ele: any) => tot + ele.count, milkCount);
+      const allMilkCount = tempExtraOrderList.reduce((tot: number, ele: any) => tot + Number(ele.count), milkCount);
       return {...item, milkCount: allMilkCount, key, extraorderlist: tempExtraOrderList, milkorderlist: tempMilkOrderList.map((ele: any, index: number) => ({...ele, key: index}))};
     });
     setGoodsOrderData(dataList);
@@ -259,9 +259,10 @@ const Goods: React.FunctionComponent = () => {
 
   const extraAdd = () => {
     addItem({
-      product: '',
-      salePrice: null,
-      courierFee: null,
+      product: '爱他美2',
+      salePrice: 225,
+      count: 2,
+      courierFee: 7.8,
     }, 'extraorderlist');
   }
   
@@ -455,7 +456,7 @@ const Goods: React.FunctionComponent = () => {
                           </Form.Item>
                         </Col>
                         <Col span={3}>
-                          <Button type='text' style={{marginTop: '30px'}} icon={<PlusCircleOutlined />} onClick={() =>  add(index)}></Button>
+                          <Button type='text' style={{marginTop: '30px'}} icon={<PlusCircleOutlined />} onClick={milkAdd}></Button>
                           <Button type='text' style={{marginTop: '30px'}} icon={<MinusCircleOutlined />} onClick={() => remove(index)}></Button>
                         </Col>
                       </Row>)
@@ -532,7 +533,7 @@ const Goods: React.FunctionComponent = () => {
                           </Form.Item>
                         </Col>
                         <Col span={3}>
-                          <Button type='text' style={{marginTop: '30px'}} icon={<PlusCircleOutlined />} onClick={() =>  add(index)}></Button>
+                          <Button type='text' style={{marginTop: '30px'}} icon={<PlusCircleOutlined />} onClick={() =>  extraAdd()}></Button>
                           <Button type='text' style={{marginTop: '30px'}} icon={<MinusCircleOutlined />} onClick={() => remove(index)}></Button>
                         </Col>
                       </Row>)
