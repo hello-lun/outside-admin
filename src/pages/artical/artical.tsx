@@ -5,8 +5,6 @@
 // todo 记住当前页面
 // // 记住当前页面
 import React, { useState, useRef, useEffect, ElementRef } from 'react';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
 import styles from './artical.module.scss';
 import { Pagination, Button, Spin, Select, Space, Col, Row } from 'antd';
 import { useOnceEffect } from '@/hooks/onceEffect';
@@ -16,7 +14,8 @@ import { articalTypes, ArticalTypeEnum } from './configs';
 import TranslateLayer from '@/components/translateLayer/translateLayer';
 import NewWordCom from '@/components/new-word/new-word';
 import { isMobile } from '@/utils/helper';
-import { MenuUnfoldOutlined } from '@ant-design/icons';
+import { localStorageGetter } from '@/utils/helper';
+
 const SAVA_TIMES = 1000 * 60;
 
 interface AnyObject {
@@ -66,9 +65,8 @@ export default function Artical() {
   useOnceEffect(() => {
     eventListener();
     savaMyself();
-    const englishInfo = JSON.parse(localStorage.getItem('englishInfo') || '{}');
-    curPageNum.current = englishInfo.articalCurrentPage || 1;
-    const articalType = englishInfo.currentType || ArticalTypeEnum.FAIRY;
+    curPageNum.current = localStorageGetter('englishInfo', 'articalCurrentPage') || 1;
+    const articalType = localStorageGetter( 'englishInfo', 'currentType') || ArticalTypeEnum.FAIRY;
     setArticalType(articalType);
     getArticalsData({
       type: articalType
@@ -148,7 +146,7 @@ export default function Artical() {
       text: cleanedHtmlString,
       title: curArticalData?.title
     });
-    setNewWords(JSON.parse(curArticalData?.words || '[]'));
+    setNewWords(curArticalData?.words ? JSON.parse(curArticalData?.words).words : []);
   }
 
   function scrollToText(searchTerm: string) {
@@ -273,11 +271,10 @@ export default function Artical() {
   }
 
   function rememberHandler() {
-    const englishInfo = JSON.parse(localStorage.getItem('englishInfo') || '{}');
     localStorage.setItem(
       'englishInfo',
       JSON.stringify({
-        ...englishInfo,
+        ...localStorageGetter('englishInfo', 'articalCurrentPage'),
         articalCurrentPage: curPageNum.current,
         currentType: articalType
       })

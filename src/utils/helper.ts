@@ -1,4 +1,5 @@
 import { StoreApi, UseBoundStore } from 'zustand';
+import { get } from 'lodash-es';
 
 /**
  * @param { Promise } promise
@@ -37,4 +38,14 @@ export const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(
   }
 
   return store
+}
+
+export function localStorageGetter(name: string, key?: string) {
+  try {
+    const storage = localStorage.getItem(name);
+    if (!storage) return '';
+    const formatStorage = JSON.parse(storage);
+    return key ? get(formatStorage, key) : formatStorage;
+  } catch(e) {
+  }
 }

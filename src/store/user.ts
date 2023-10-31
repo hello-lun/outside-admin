@@ -34,11 +34,11 @@ export const useUserStore = createSelectors(create<IUser>()(
           perms: []
         },
         updateUser: (data: IUserData) => set((state) => {
-          localStorage.setItem('user_token_data', data.authorization);
+          localStorage.setItem('system_data', JSON.stringify(data));
           state.user = data;
         }),
         removeUser: () => set((state) => {
-          localStorage.setItem('user_token_data', '');
+          localStorage.setItem('system_data', '');
           state.user = {
             authorization: '',
             currentUser: {

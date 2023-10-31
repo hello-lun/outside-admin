@@ -5,8 +5,6 @@
 // todo 记住当前页面
 // // 记住当前页面
 import React, { useState, useRef, useEffect, ElementRef } from 'react';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
 import styles from './novel.module.scss';
 import { Pagination, Button, Input, Select, Space, Col, Row } from 'antd';
 import { useOnceEffect } from '@/hooks/onceEffect';
@@ -17,6 +15,8 @@ import NewWordCom from '@/components/new-word/new-word';
 import { getNovel, getPDFMarkDetail } from '../../service/translate';
 import { updateNovelMark, getNovelMark } from '../../service/novel';
 import { isMobile } from '@/utils/helper';
+import { localStorageGetter } from '@/utils/helper';
+
 const SAVA_TIMES = 1000 * 60;
 
 interface AnyObject {
@@ -67,11 +67,10 @@ export default function Artical() {
   useOnceEffect(() => {
     eventListener();
     savaMyself();
-    const novelInfo = JSON.parse(localStorage.getItem('novelInfo') || '{}');
-    curPageNum.current = novelInfo.articalCurrentPage || 1;
+    curPageNum.current = localStorageGetter('novelInfo', 'articalCurrentPage') || 1;
     getNovelData(curPageNum.current, curPageNum.current);
     getNovelMarkHandler();
-    const articalType = novelInfo.currentType || ArticalTypeEnum.FAIRY;
+    const articalType = localStorageGetter('novelInfo', 'currentType') || ArticalTypeEnum.FAIRY;
     setArticalType(articalType);
 
     return () => {
@@ -284,11 +283,10 @@ export default function Artical() {
     }
 
   function rememberHandler() {
-    const novelInfo = JSON.parse(localStorage.getItem('novelInfo') || '{}');
     localStorage.setItem(
       'novelInfo',
       JSON.stringify({
-        ...novelInfo,
+        ...localStorageGetter('novelInfo'),
         articalCurrentPage: curPageNum.current,
         currentType: articalType
       })

@@ -6,6 +6,7 @@ import styles from './pdf.module.scss';
 import { Pagination, Button, Input, Spin } from 'antd';
 import { useOnceEffect } from '@/hooks/onceEffect';
 import { translatePDF, savePDFDetail, getPDFMarkDetail, getArticals } from '../../service/translate';
+import { localStorageGetter } from '@/utils/helper';
 
 import pds from '../../assets/english-word.pdf';
 
@@ -104,9 +105,7 @@ export default function Sample() {
   }
 
   function initPageNum() {
-    const pdfInfo = localStorage.getItem('pdfInfo') || '{}';
-    const parseData = JSON.parse(pdfInfo);
-    onChange(parseData.currentPage);
+    onChange(localStorageGetter('parseData', 'currentPage'));
   }
 
   function fetchPdfMarkDetail(pageNum: number) {

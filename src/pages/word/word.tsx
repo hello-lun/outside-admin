@@ -1,7 +1,4 @@
 import React, { useState, useRef } from 'react';
-import { pdfjs } from 'react-pdf';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
 import styles from './word.module.scss';
 import { Pagination, Button, Input, Spin } from 'antd';
 import { useOnceEffect } from '@/hooks/onceEffect';
@@ -10,12 +7,10 @@ import SpeakWord from '@/components/speakWord';
 import { useNavigate } from 'react-router-dom';
 import TranslateLayer from '@/components/translateLayer/translateLayer';
 import pds from '../../assets/english-word.pdf';
+import { localStorageGetter } from '@/utils/helper';
 
 const { TextArea } = Input;
 const SAVA_TIMES = 1000 * 60;
-
-// pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url).toString();
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 interface AnyObject {
   backgroundColor?: string;
@@ -49,11 +44,6 @@ export default function Sample() {
   const [paginationDisabled, setPaginationDisabled] = useState<boolean>(false);
   const navigate = useNavigate();
   
-  async function getPdfdata() {
-    const pdf = await pdfjs.getDocument(pds).promise;
-    setTotal(pdf.numPages);
-  }
-
   useOnceEffect(() => {
     addEvent();
     // getPdfdata();
@@ -192,9 +182,7 @@ export default function Sample() {
   }
 
   function initPageNum() {
-    const englishInfo = localStorage.getItem('englishInfo') || '{}';
-    const parseData = JSON.parse(englishInfo);
-    onPageChange(parseData.wordCurrentPage || 1);
+    onPageChange(localStorageGetter('parseData', 'wordCurrentPage') || 1);
   }
 
   function fetchPdfMarkDetail(pageNum: number) {
@@ -344,11 +332,10 @@ export default function Sample() {
   }
 
   function remberHandler() {
-    const englishInfo = JSON.parse(localStorage.getItem('englishInfo') || '{}');
     localStorage.setItem(
       'englishInfo',
       JSON.stringify({
-        ...englishInfo,
+        ...localStorageGetter('englishInfo'),
         wordCurrentPage: curPageNum
       })
     );
