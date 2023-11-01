@@ -5,11 +5,14 @@ import { login, IUserInfo } from '@/service/auth';
 import { useNavigate } from 'react-router-dom';
 import { useOnceEffect, useIsLogin } from '@/hooks/onceEffect';
 import { useUserStore } from '@/store/user';
+import { useRouterStore } from '@/store/router';
+import { formatRouterCom } from '@/routers/routerMap';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const formRef = useRef<FormInstance>(null);
   const updateUser = useUserStore.use.updateUser();
+  const addRouterConfigs = useRouterStore.use.addRoute();
 
   useIsLogin(() => navigate('/'));
 
@@ -17,10 +20,27 @@ const Login: React.FC = () => {
     navigate('/register');
   };
 
+  const dealDymRouter = (data: any) => {
+    let dymRouters = data.menuList?.find((item: any) => item.path === '/')?.children || [];
+    dymRouters = dymRouters.map((item: any) => {
+      return {
+        path: item.path,
+        element: formatRouterCom(item.component),
+        children: item.children,
+      };
+    });
+    addRouterConfigs(dymRouters);
+  }
+
+  const loginSuccess = (data: any) => {
+    updateUser(data);
+    dealDymRouter(data);
+  }
+
   const onFinish = (values: IUserInfo) => {
     login(values)
       .then((data: any) => {
-        updateUser(data);
+        loginSuccess(data);
         navigate('/artical');
       })
       .catch(err => {

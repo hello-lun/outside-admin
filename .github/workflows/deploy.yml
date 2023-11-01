@@ -38,8 +38,8 @@ jobs:
         host: ${{ secrets.AMAZON_EC2_HOST }}
         username: ${{ secrets.AMAZON_EC2_NAME }}
         key: ${{ secrets.AMAZON_SECRET_KEY }}
-        script: |
-          cd /home/ec2-user/app
-          docker stop app-nginx
-          docker rmi -f app-nginx
-          docker-compose up --no-deps --build -d nginx
+        # script: |
+        #   cd /home/ec2-user/app
+        #   docker stop app-nginx
+        #   docker rmi -f app-nginx
+        #   docker-compose up --no-deps --build -d nginx
