@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useOnceEffect, useIsLogin } from '@/hooks/onceEffect';
 import { useUserStore } from '@/store/user';
 import { useRouterStore } from '@/store/router';
-import { formatRouterCom } from '@/routers/routerMap';
+import { localStorageSetter } from '@/utils/helper';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -25,10 +25,11 @@ const Login: React.FC = () => {
     dymRouters = dymRouters.map((item: any) => {
       return {
         path: item.path,
-        element: formatRouterCom(item.component),
+        element: item.component,
         children: item.children,
       };
     });
+    localStorageSetter('system_menuList', dymRouters);
     addRouterConfigs(dymRouters);
   }
 

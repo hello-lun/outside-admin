@@ -1,12 +1,12 @@
 import axios, {
   AxiosInstance, 
   AxiosRequestConfig, 
-  AxiosResponse
+  AxiosResponse,
 } from 'axios';
 import { useUserStore } from '@/store/user';
 import { localStorageGetter } from '@/utils/helper';
 
-axios.defaults.baseURL = process.env.REACT_APP_API_URL;
+axios.defaults.baseURL = process.env.REACT_APP_API_URL + '/api';
 axios.defaults.headers.head['Content-Type'] = 'application/json;chartset=utf-8';
 // axios.defaults.withCredentials = true;
 export interface IResponse<T = any> {
@@ -24,11 +24,9 @@ axiosInstance.interceptors.request.use(
   (config: AxiosRequestConfig) => {
     if(config.headers) {
       const userData = useUserStore.getState();
-      const authorization = localStorageGetter('authorization', 'system_data');
+      const authorization = localStorageGetter('system_data', 'authorization');
       config.headers['token'] = userData.user.authorization || authorization;  // 在此处将token添加到header
     }
-    // 可以添加请求头、认证信息等
-    config.url = `/api${config.url}`; // 添加接口前缀 "/api"
     return config;
   },
   (error: any) => {
@@ -50,7 +48,7 @@ axiosInstance.interceptors.response.use(
       response: { status }
     } = err;
     if (status === 401 || status === 403) {
-      useUserStore.getState().removeUser();
+      // useUserStore.getState().removeUser();
       window.location.href = '/login';
     }
     return Promise.reject(err.response.data);

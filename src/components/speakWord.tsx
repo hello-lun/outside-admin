@@ -33,7 +33,6 @@ const SpeakWord: React.ForwardRefRenderFunction<AudioComponentMethods, AudioComp
         audioRef.current?.play()
       }, 10)
     }).catch(e => {
-      console.log('e: ', e);
     })
   }
 
@@ -91,7 +90,6 @@ const SpeakWord: React.ForwardRefRenderFunction<AudioComponentMethods, AudioComp
           wordgap: 30
         });
     } catch (err) {
-      console.log('err: ', err);
     }
   }
 

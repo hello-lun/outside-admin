@@ -2,6 +2,8 @@ import React, { lazy, useEffect, useState } from 'react';
 import { RouteObject, RouteProps } from 'react-router-dom';
 import lazyWrapper from '../components/lazyWrapper';
 import AuthWrapper from './authWrapper';
+import { localStorageGetter } from '@/utils/helper';
+import { formatRouterCom } from '@/router/routerMap';
 
 const Home = () => import('../pages/home');
 const Login = () => import('../pages/login/login');
@@ -17,7 +19,7 @@ type IRouteObject = RouteObject & {
   auth?: boolean;
 };
 
-const routerConfigs: Array<RouteProps> = [
+export const staticRouterConfigs: Array<RouteProps> = [
   {
     path: '/',
     element: lazyWrapper(Home),
@@ -44,4 +46,15 @@ const routerConfigs: Array<RouteProps> = [
   }
 ];
 
-export default routerConfigs;
+export const getAllRouters = () => {
+  const menuList = localStorageGetter('system_menuList') || [];
+  const dymRouters = menuList.map((item: any) => {
+    return {
+      path: item.path,
+      element: formatRouterCom(item.element),
+      children: item.children,
+    };
+  });
+  return staticRouterConfigs.concat(dymRouters);
+}
+

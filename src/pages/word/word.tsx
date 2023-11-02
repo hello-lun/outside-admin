@@ -103,7 +103,6 @@ export default function Sample() {
       startNum,
       endNum
     }).then((res: any) => {
-      console.log('res: ', res);
       // Split the string using multiple spaces as delimiter
       const parts = res.pageText.split(/\s{2,}/);
 

@@ -15,9 +15,7 @@ export default function useAbout({ id, name }: IAboutProps) {
     (async function () {
       try {
         const sd = await getGoods();
-        console.log('sd: ', sd);
       } catch (err) {
-        console.log(666, 'er000000r: ', err);
       }
     })();
   }, []);

@@ -18,11 +18,9 @@ const Goods: React.FC = () => {
       //   image: `${Math.random()}`
       getGoods()
         .then((data: any) => {
-          console.log('data: ', data);
           setGoodsList(data instanceof Array ? data : []);
         })
         .catch(err => {
-          console.log('goods,err: ', err);
         });
     }
   }, []);

@@ -3,6 +3,7 @@ import { subscribeWithSelector, persist } from 'zustand/middleware';
 import { shallow } from 'zustand/shallow';
 import { immer } from 'zustand/middleware/immer'
 import { createSelectors } from '@/utils/helper';
+import { localStorageSetter } from '@/utils/helper';
 
 interface IUserData {
   id?: number
@@ -34,11 +35,12 @@ export const useUserStore = createSelectors(create<IUser>()(
           perms: []
         },
         updateUser: (data: IUserData) => set((state) => {
-          localStorage.setItem('system_data', JSON.stringify(data));
+          localStorageSetter('system_data', data);
           state.user = data;
         }),
         removeUser: () => set((state) => {
-          localStorage.setItem('system_data', '');
+          localStorageSetter('system_data', '');
+          localStorageSetter('system_menuList', '');
           state.user = {
             authorization: '',
             currentUser: {

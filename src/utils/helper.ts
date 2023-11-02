@@ -49,3 +49,10 @@ export function localStorageGetter(name: string, key?: string) {
   } catch(e) {
   }
 }
+
+export function localStorageSetter<T>(name: string, data: T) {
+  try {
+    localStorage.setItem(name, JSON.stringify(data));
+  } catch(e) {
+  }
+}

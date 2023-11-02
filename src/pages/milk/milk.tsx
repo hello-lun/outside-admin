@@ -112,7 +112,6 @@ const Goods: React.FunctionComponent = () => {
   };
 
   const onFinish = async (values: any) => {
-    console.log(values);
     await insertMilk({...values});
     await getAllMilkData();
     formRef.current?.resetFields();
