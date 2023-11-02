@@ -2,6 +2,7 @@ import axios, {
   AxiosInstance, 
   AxiosRequestConfig, 
   AxiosResponse,
+  InternalAxiosRequestConfig,
 } from 'axios';
 import { useUserStore } from '@/store/user';
 import { localStorageGetter } from '@/utils/helper';
@@ -21,7 +22,7 @@ const axiosInstance: AxiosInstance = axios.create({
 
 // 请求拦截器
 axiosInstance.interceptors.request.use(
-  (config: AxiosRequestConfig) => {
+  (config: InternalAxiosRequestConfig) => {
     if(config.headers) {
       const userData = useUserStore.getState();
       const authorization = localStorageGetter('system_data', 'authorization');
