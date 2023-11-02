@@ -25,7 +25,7 @@ axiosInstance.interceptors.request.use(
     if(config.headers) {
       const userData = useUserStore.getState();
       const authorization = localStorageGetter('system_data', 'authorization');
-      config.headers['token'] = userData.user.authorization || authorization;  // 在此处将token添加到header
+      (config.headers as Record<string, string>)['token'] = userData.user.authorization || authorization;
     }
     return config;
   },
