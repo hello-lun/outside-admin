@@ -230,7 +230,7 @@ const Goods: React.FC = () => {
           </Form.Item>
           <Form.Item rules={[{ required: true}]} label="Upload" valuePropName="fileList" getValueFromEvent={normFile} name="images">
             <Upload
-              action="http://localhost:8888/api/sys/user/uploadImage"
+              action={`${process.env.REACT_APP_API_URL}/api/sys/user/uploadImage`}
               listType="picture-card"
               headers={{
                 token

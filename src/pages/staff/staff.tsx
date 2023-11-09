@@ -23,7 +23,7 @@ import { catchError } from '@/utils/helper';
 
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
-const baseUrl = 'http://localhost:8888/api/';
+const baseUrl = process.env.REACT_APP_IMG_URL;
 
 interface IFormData {
   id?: number;
@@ -192,7 +192,7 @@ const Goods: React.FC = () => {
           </Form.Item>
           <Form.Item rules={[{ required: true}]} label="Upload" valuePropName="fileList" getValueFromEvent={normFile} name="img">
             <Upload
-              action="http://localhost:8888/api/sys/user/uploadImage"
+              action={`${process.env.REACT_APP_API_URL}/api/sys/user/uploadImage`}
               listType="picture-card"
               maxCount={1}
               headers={{
