@@ -16,17 +16,19 @@ interface IRouter {
 }
 
 export const useRouterStore = createSelectors(create<IRouter>()(
-  immer(
-    (set) => ({
-      routers: getAllRouters(),
-      addRoute: (data: IMenuList[] | IMenuList) => set((state) => {
-        const others = conbindRouters(data, state.routers);
-        state.routers.push(...others);
-      }),
-      removeRouter: () => set((state) => {
-        state.routers = [...staticRouterConfigs()];
-      })
+  (set) => ({
+    routers: getAllRouters(),
+    addRoute: (data: IMenuList[] | IMenuList) => set((state) => {
+      const others = conbindRouters(data, state.routers);
+      return {
+        routers: [...state.routers, ...others]
+      };
+    }),
+    removeRouter: () => set((state) => {
+      return {
+        routers: [...staticRouterConfigs()]
+      };
     })
-    )
+  })
 ));
 
