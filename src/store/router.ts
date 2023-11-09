@@ -3,36 +3,29 @@ import { subscribeWithSelector, persist } from 'zustand/middleware';
 import { shallow } from 'zustand/shallow';
 import { immer } from 'zustand/middleware/immer'
 import { createSelectors } from '@/utils/helper';
-import { getAllRouters } from '@/router/configs';
+import { getAllRouters, filterRootChilds, formatChildren, conbindRouters } from '@/router/helper';
 import { formatRouterCom } from '@/router/routerMap';
+import { localStorageSetter } from '@/utils/helper';
+import { IRouteObject, staticRouterConfigs } from '@/router/configs';
+import { IMenuList } from '@/service/auth';
 
 interface IRouter {
-  routers: any,
-  addRoute: (data: any) => void
+  routers: IRouteObject[],
+  addRoute: (data: IMenuList[] | IMenuList) => void,
+  removeRouter: () => void,
 }
 
 export const useRouterStore = createSelectors(create<IRouter>()(
   immer(
     (set) => ({
       routers: getAllRouters(),
-      addRoute: (data: any) => set((state: any) => {
-        if (!data) return;
-        if (data instanceof Array) {
-          const dymRouters = data.map((item: any) => {
-            return {
-              path: item.path,
-              element: formatRouterCom(item.element),
-              children: item.children,
-            };
-          });
-          state.routers.push(...dymRouters);
-        } else {
-          state.routers.push({
-            ...data,
-            element: formatRouterCom(data.element),
-          });
-        }
+      addRoute: (data: IMenuList[] | IMenuList) => set((state) => {
+        const others = conbindRouters(data, state.routers);
+        state.routers.push(...others);
       }),
+      removeRouter: () => set((state) => {
+        state.routers = [...staticRouterConfigs()];
+      })
     })
     )
 ));

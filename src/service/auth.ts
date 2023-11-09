@@ -1,10 +1,26 @@
 
 import http from '../utils/http';
 
+export interface IMenuList {
+  path: string;
+  component: string;
+  children: IMenuList[];
+  name: string;
+  icon: string;
+}
+
 export interface IUserInfo {
-  username: string;
-  password: string;
-  phone: string;
+  authorization: string;
+  currentUser: {
+    avatar: string,
+    email: string,
+    id: number,
+    phonenumber: string,
+    status: string,
+    username: string,
+  };
+  menuList: IMenuList[];
+  perms: any[];
 }
 
 export const login = (data: IUserInfo) => {

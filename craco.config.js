@@ -1,24 +1,33 @@
 /* eslint-disable */
 const path = require('path');
 const pxToViewport = require('postcss-px-to-viewport-8-plugin');
-const pathResolve = pre => path.join(__dirname, pre);
+const pathJoin = pre => path.join(__dirname, pre);
+const pathResolve = pre => path.resolve(__dirname, pre);
 // const vw = pxToViewport({
 //   // 视口宽度，一般就是 375（ 设计稿一般采用二倍稿，宽度为 375 ）
 //   viewportWidth: 375
 // });
 
 module.exports = {
+  style: {
+    sass: {
+      loaderOptions: {
+        // 这里是你想要添加的全局变量或 mixin
+        additionalData: `@import "${pathResolve('src/styles/index.scss')}";`
+      }
+    }
+  },
   webpack: {
     alias: {
-      '@': pathResolve('src'),
-      '@redux-modules': pathResolve('src/redux/modules'),
-      '@assets': pathResolve('src/assets'),
-      '@components': pathResolve('src/components'),
-      '@routes': pathResolve('src/routes'),
-      '@service': pathResolve('src/service'),
-      '@styles': pathResolve('src/styles'),
-      '@types': pathResolve('src/types'),
-      '@utils': pathResolve('src/utils')
+      '@': pathJoin('src'),
+      '@redux-modules': pathJoin('src/redux/modules'),
+      '@assets': pathJoin('src/assets'),
+      '@components': pathJoin('src/components'),
+      '@routes': pathJoin('src/routes'),
+      '@service': pathJoin('src/service'),
+      '@styles': pathJoin('src/styles'),
+      '@types': pathJoin('src/types'),
+      '@utils': pathJoin('src/utils')
     },
 
     configure(webpackConfig) {

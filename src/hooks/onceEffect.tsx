@@ -20,8 +20,8 @@ type ILoginCB = (() => void) | null;
 
 export const useIsLogin = (isLoginCB?: ILoginCB, notLoginCB?: ILoginCB) => {
   useOnceEffect(() => {
-    const userData = useUserStore.getState();
-    if (userData.user.authorization) {
+    const userData = useUserStore.getState().user;
+    if (!!userData?.authorization) {
       isLoginCB && isLoginCB();
     } else {
       notLoginCB && notLoginCB();

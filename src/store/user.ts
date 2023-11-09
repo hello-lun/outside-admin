@@ -3,64 +3,56 @@ import { subscribeWithSelector, persist } from 'zustand/middleware';
 import { shallow } from 'zustand/shallow';
 import { immer } from 'zustand/middleware/immer'
 import { createSelectors } from '@/utils/helper';
-import { localStorageSetter } from '@/utils/helper';
-
-interface IUserData {
-  id?: number
-  authorization: string,
-  currentUser: {
-    username: string
-  },
-  menuList: Array<object>,
-  perms: Array<object>
-}
+import { localStorageSetter, localStorageGetter } from '@/utils/helper';
+import { IUserInfo } from '@/service/auth';
 
 interface IUser {
-  user: IUserData,
-  updateUser: (data: IUserData) => void,
+  user: IUserInfo,
+  updateUser: (data: IUserInfo) => void,
   removeUser: () => void,
   updateUserName: (username: string) => void,
 }
 
+const defaultUserData: () => IUserInfo = () => ({
+  authorization: '',
+  currentUser: {
+    avatar: '',
+    email: '',
+    id: 0,
+    phonenumber: '',
+    status: '',
+    username: '',
+  },
+  menuList: [],
+  perms: [],
+});
+
+const initUserData = () => {
+  const localUserData = localStorageGetter('system_data');
+  if (localUserData) {
+    return localUserData;
+  } else {
+    return defaultUserData();
+  }
+}
+
 export const useUserStore = createSelectors(create<IUser>()(
   immer(
-    persist(
-      (set) => ({
-        user: {
-          authorization: '',
-          currentUser: {
-            username: ''
-          },
-          menuList: [],
-          perms: []
-        },
-        updateUser: (data: IUserData) => set((state) => {
-          localStorageSetter('system_data', data);
-          state.user = data;
-        }),
-        removeUser: () => set((state) => {
-          localStorageSetter('system_data', '');
-          localStorageSetter('system_menuList', '');
-          state.user = {
-            authorization: '',
-            currentUser: {
-              username: ''
-            },
-            menuList: [],
-            perms: []
-          };
-        }),
-        updateUserName: (username: string) => set((state) => {
-          // state.user.username = username;
-        }),
+    (set) => ({
+      user: initUserData(),
+      updateUser: (data: IUserInfo) => set((state) => {
+        localStorageSetter('system_data', data);
+        state.user = data;
       }),
-      {
-        name: 'user_data',
-        getStorage: () => localStorage,
-        partialize: (state) => ({
-          userData: state.user
-        })
-      }
-    ))
+      removeUser: () => set((state) => {
+        localStorageSetter('system_data', {});
+        localStorageSetter('system_menuList', []);
+        state.user = defaultUserData();
+      }),
+      updateUserName: (username: string) => set((state) => {
+        // state.user.username = username;
+      }),
+    }),
+  )
 ));
 

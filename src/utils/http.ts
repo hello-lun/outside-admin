@@ -9,7 +9,8 @@ import { localStorageGetter } from '@/utils/helper';
 
 axios.defaults.baseURL = process.env.REACT_APP_API_URL + '/api';
 axios.defaults.headers.head['Content-Type'] = 'application/json;chartset=utf-8';
-// axios.defaults.withCredentials = true;
+axios.defaults.timeout = 1000 * 60;
+
 export interface IResponse<T = any> {
   code: number;
   message: string;
@@ -49,14 +50,14 @@ axiosInstance.interceptors.response.use(
       response: { status }
     } = err;
     if (status === 401 || status === 403) {
-      // useUserStore.getState().removeUser();
+      useUserStore.getState().removeUser();
       window.location.href = '/login';
     }
     return Promise.reject(err.response.data);
   }
 );
 
-const http = <T>(configs: AxiosRequestConfig): Promise<IResponse<T>> => {
+const http = <T>(configs: AxiosRequestConfig): Promise<T> => {
   const { method } = configs;
   if (method === 'get') {
     configs.params = configs.data;

@@ -23,11 +23,11 @@ const HoverMenu: React.FunctionComponent = () => {
   return <div className={styles.menu}>
     <Drawer title="菜单" placement="right" onClose={onClose} open={open}>
       <div onClick={itemClick} className={styles.menuItem}>
-        <p data-path="/artical">阅读</p>
-        <p data-path="/novel">小说</p>
-        <p data-path="/word">记单词</p>
-        <p data-path="/goodsCount">订单详情</p>
-        <p data-path="/milk">录入奶粉</p>
+        <p data-path="/others/artical">阅读</p>
+        <p data-path="/others/novel">小说</p>
+        <p data-path="/others/word">记单词</p>
+        <p data-path="/others/goodsCount">订单详情</p>
+        <p data-path="/others/milk">录入奶粉</p>
       </div>
     </Drawer>
     <MenuUnfoldOutlined onClick={() => setOpen(true)} />

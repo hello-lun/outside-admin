@@ -131,7 +131,7 @@ const Header: React.FC = () => {
 
             <Col className={styles.menu}>
               <div className={styles['sign-up']}>
-                {userData.id ? (
+                {userData.currentUser.id ? (
                   <p onClick={() => login('login')}>
                     <span>{userData.currentUser.username}</span>
                   </p>

@@ -1,46 +1,16 @@
 .content {
-  padding: 20px 20px;
-}
-
-
-.banner {
   width: 100%;
-  height: 718px;
-  position: relative;
-  background-image: url(https://img001.video2b.com/1785/file_01669972899693.jpg?x-oss-process=image/resize,m_lfit,w_1464);
-  background-repeat: no-repeat;
-  background-position: 100% 100%;
+  height: 100%;
 }
 
-.banner-text {
-  position: absolute;
-  top: 50%;
-  margin: -50px 0 0 30px;
-}
-
-.banner-title {
-  font-size: 35px;
-  font-weight: 600;
+.title {
+  padding: 20px 20px;
   color: #fff;
-  width: 450px;
-  line-height: 50px;
-  span {
-    color: #14edc7;
-  }
-}
-
-.banner-subtitle {
-  color: rgba(255, 255, 255, 0.7);
-  margin: 40px 0;
-}
-
-.banner-button {
-  width: 172px;
-  height: 47px;
-  background-color: #017276;
   text-align: center;
-  line-height: 47px;
-  color: #FFFFFF;
-  font-size: 14px;
-  border-radius: 6px;
+}
+
+.menus {
+  :global {
+    
+  }
 }

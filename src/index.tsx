@@ -12,7 +12,7 @@ import reportWebVitals from './reportWebVitals';
 import zhCN from 'antd/locale/zh_CN';
 import Vconsole from 'vconsole'
 
-import './index.css';
+import './styles/index.scss';
 import 'normalize.css';
 
 const vConsole = new Vconsole();
