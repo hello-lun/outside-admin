@@ -23,7 +23,7 @@ import { catchError } from '@/utils/helper';
 
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
-const baseUrl = 'http://localhost:8888/api/';
+const baseUrl = process.env.REACT_APP_IMG_URL;
 
 interface IFormData {
   id?: number;
