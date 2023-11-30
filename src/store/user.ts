@@ -8,13 +8,14 @@ import { IUserInfo } from '@/service/auth';
 
 interface IUser {
   user: IUserInfo,
-  updateUser: (data: IUserInfo) => void,
+  updateUser: (data: any) => void,
   removeUser: () => void,
   updateUserName: (username: string) => void,
 }
 
 const defaultUserData: () => IUserInfo = () => ({
   authorization: '',
+  refreshToken: '',
   currentUser: {
     avatar: '',
     email: '',
@@ -40,9 +41,13 @@ export const useUserStore = createSelectors(create<IUser>()(
   immer(
     (set) => ({
       user: initUserData(),
-      updateUser: (data: IUserInfo) => set((state) => {
-        localStorageSetter('system_data', data);
-        state.user = data;
+      updateUser: (data: any) => set((state) => {
+        const temp = {
+          ...state.user ,
+          ...data
+        };
+        localStorageSetter('system_data', temp);
+        state.user = temp;
       }),
       removeUser: () => set((state) => {
         localStorageSetter('system_data', {});

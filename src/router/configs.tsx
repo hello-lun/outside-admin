@@ -6,15 +6,12 @@ const Home = () => import('../pages/home');
 const Login = () => import('../pages/login/login');
 const Register = () => import('../pages/register/register');
 const Test = () => import('../pages/test/test');
-
-// interface IPageItem {
-//     path: string;
-//     element: any;
-// };
+const NewWord = () => import('../pages/new-word/word');
 
 export type IRouteObject = RouteObject & {
-  auth?: boolean;
+  name?: string;
 };
+
 
 export const staticRouterConfigs: () => Array<IRouteObject> = () => [
   {

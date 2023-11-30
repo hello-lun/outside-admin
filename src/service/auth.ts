@@ -11,6 +11,7 @@ export interface IMenuList {
 
 export interface IUserInfo {
   authorization: string;
+  refreshToken: string;
   currentUser: {
     avatar: string,
     email: string,
@@ -45,6 +46,9 @@ export const logout = () => {
   });
 };
 
+export const getRefreshToken = (data?: any) => {
+  return http<any>({method: 'get', url: '/refresh-token', data });
+};
 
 export const translate = (data?: any) => {
   return http<any>({method: 'post', url: '/translate', data });

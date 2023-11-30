@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
-
+import { sleep } from '@/utils/helper';
 export interface AudioComponentMethods {
   // 定义子组件暴露给父组件的方法
   stopAudio: () => void;
@@ -7,10 +7,24 @@ export interface AudioComponentMethods {
   playWordAudio: (words: string[] | string) => void;
 }
 
+let speakEndFlag = false;
+
 interface AudioComponentProps {
   words: string[];
   interval?: number;
+  quickly?: boolean;
   onSuccese?: (index: number) => void;
+}
+
+function speak(text?: string, end?: () => void) {
+  const synth = window.speechSynthesis;
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = 'en-GB';
+  utterance.rate = 0.7; // 比正常速度慢
+
+  end && (utterance.onend = end);
+
+  synth.speak(utterance);
 }
 
 const SpeakWord: React.ForwardRefRenderFunction<AudioComponentMethods, AudioComponentProps> = (props, ref) => {
@@ -36,11 +50,15 @@ const SpeakWord: React.ForwardRefRenderFunction<AudioComponentMethods, AudioComp
     })
   }
 
+  function speakWord(word: string) {
+    props.quickly ? speak(word) : setSpeakWordUrl(`http://dict.youdao.com/dictvoice?audio=${word}`);
+  }
+
   async function playWordAudio(words: string[] | string) {
     if (words instanceof Array) {
       audioEnd();
     } else {
-      setSpeakWordUrl(`http://dict.youdao.com/dictvoice?audio=${words}`);
+      props.quickly ? speak(words) : setSpeakWordUrl(`http://dict.youdao.com/dictvoice?audio=${words}`);
     }
   }
 
@@ -50,10 +68,10 @@ const SpeakWord: React.ForwardRefRenderFunction<AudioComponentMethods, AudioComp
       const word = audioListRef.current.shift();
       if (interval > 0) {
         setTimeout(() => {
-          setSpeakWordUrl(`http://dict.youdao.com/dictvoice?audio=${word}`);
+          props.quickly ? speak(word) : setSpeakWordUrl(`http://dict.youdao.com/dictvoice?audio=${word}`);
         }, interval);
       } else {
-        setSpeakWordUrl(`http://dict.youdao.com/dictvoice?audio=${word}`);
+        props.quickly ? speak(word) : setSpeakWordUrl(`http://dict.youdao.com/dictvoice?audio=${word}`);
       }
     }
   }
@@ -64,11 +82,41 @@ const SpeakWord: React.ForwardRefRenderFunction<AudioComponentMethods, AudioComp
     playAudio();
   }
 
+  async function speakHandler(w: string) {
+    return new Promise((resolve) => {
+      speakEndFlag = true;
+      speak(w, async () => {
+        audioLoad();
+        speakEndFlag = false;
+        // await sleep(2000);
+        resolve(true);
+      });
+    });
+  }
+
   useEffect(() => {
     audioListRef.current = [...props.words];
     curretIndex.current = 0;
-    const word = audioListRef.current.shift() || '';
-    if (word) {
+    speakEndFlag = false;
+    if (props.quickly) {
+      (async () => {
+        while(audioListRef.current.length > 0) {
+          if(!speakEndFlag) {
+            const word = audioListRef.current.shift();
+            if(props.interval) {
+                await sleep(props.interval);
+                word && await speakHandler(word);
+            } else {
+              word && await speakHandler(word);
+            }
+          } else {
+            continue;
+          }
+        }
+      })()
+    } else {
+      const word = audioListRef.current.shift() || '';
+      if (!word) return;
       setSpeakWordUrl(`http://dict.youdao.com/dictvoice?audio=${word}`);
     }
   }, [props.words]);
@@ -83,12 +131,7 @@ const SpeakWord: React.ForwardRefRenderFunction<AudioComponentMethods, AudioComp
   function audioError() {
     try {
       if (props.words[0]?.trim())
-        speak(props.words[0], {
-          pitch: 40,
-          voice: 'en/en-us',
-          amplitude: 200,
-          wordgap: 30
-        });
+        speak(props.words[0]);
     } catch (err) {
     }
   }

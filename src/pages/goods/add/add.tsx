@@ -19,11 +19,11 @@ import { useToken } from '@/hooks/useToken';
 import styles from './add.module.scss';
 import { get } from 'lodash-es';
 import { addGoods, editGoods, getGoods, batchAddGoods, deleteGoods } from '@/service/goods'; 
+import { getCategory } from '@/service/category'; 
+import { getBrand } from '@/service/brand'; 
 import { catchError } from '@/utils/helper';
 
-const { RangePicker } = DatePicker;
-const { TextArea } = Input;
-const baseUrl = process.env.REACT_APP_IMG_URL;
+const baseUrl = `${process.env.REACT_APP_IMG_URL}${process.env.REACT_APP_API_PRE}/`;
 
 interface IFormData {
   id?: number;
@@ -32,6 +32,7 @@ interface IFormData {
   top: boolean;
   images: [];
   category: string;
+  brand: string;
 }
 
 const normFile = (e: any) => {
@@ -47,12 +48,20 @@ const initialValues: IFormData = {
   top: false,
   images: [],
   category: '',
+  brand: '',
 }
 
 const Goods: React.FC = () => {
   const [componentDisabled, setComponentDisabled] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
+  const [queryForm, setQueryForm] = useState({
+    brand: '',
+    category: '',
+    title: '',
+  });
   const [images, setImgs] = useState<any[]>([]);
+  const [category, setCategory] = useState<any[]>([]);
+  const [brand, setBrand] = useState<any[]>([]);
   const token = useToken();
   const [formData, setFormData] = useState<IFormData>({...initialValues});
   const formRef = React.useRef<FormInstance>(null);
@@ -60,13 +69,13 @@ const Goods: React.FC = () => {
   const [total, setTotal] = useState(0);
   const curPageNum = useRef<number>(1);
 
-  const getData = async (page: number) => {
+  const getData = async (data: any) => {
     setSpinning(true);
     const [, res] = await catchError<any>(getGoods({
-      page,
+      ...data,
       size: 10
     }));
-    setTotal(res.totle);
+    setTotal(res.total);
     setImgs(res.list.map((item: any) => ({
       ...item,
       src: item.images.split(',')[0],
@@ -75,7 +84,13 @@ const Goods: React.FC = () => {
   }
 
   useEffect(() => {
-    getData(1);
+    getData({page: 1});
+    getBrand().then((res: any) => {
+      setBrand(res);
+    });
+    getCategory().then((res: any) => {
+      setCategory(res);
+    });
   }, []);
 
   useEffect(() => {
@@ -128,7 +143,7 @@ const Goods: React.FC = () => {
     const [err] = await catchError(promiseHandler(postData));
     setComponentDisabled(false);
     if (!err) {
-      getData(1);
+      getData({page: 1});
       setOpen(false);
     }
   }
@@ -140,15 +155,26 @@ const Goods: React.FC = () => {
       images: data.images?.split(',').map((i: string) => ({url: `${baseUrl}${i}`})),
     });
   }
+
+  const query = () => {
+    getData(queryForm);
+  }
   
   function onChange(page: number) {
-    getData(page);
+    getData({page});
     curPageNum.current = page;
   }
 
   const onClose = () => {
     setOpen(false);
     formRef.current && formRef.current.resetFields();
+  }
+
+  const changeQuery = (data: any) => {
+    setQueryForm({
+      ...queryForm,
+      ...data
+    });
   }
 
   const deleteGoodsHandler = async (data: any) => {
@@ -164,6 +190,27 @@ const Goods: React.FC = () => {
       <Spin tip="数据加载中..." spinning={spinning}>
         <div className={styles.content}>
           <div style={{paddingLeft: "40px"}}>
+            <span>
+              商品名称：
+              <Input allowClear value={queryForm.title} style={{width: '200px'}} onChange={(e) => changeQuery({title: e.target.value})}></Input>
+            </span>
+            <span style={{margin: '0 15px'}}>
+              品牌名称：
+              <Select allowClear value={queryForm.brand} style={{width: '200px'}} onChange={(value) => changeQuery({brand: value})}>
+                {
+                  brand.map(item => <Select.Option value={item.value}>{item.lable}</Select.Option>)
+                }
+              </Select>
+            </span>
+            <span style={{margin: '0 15px'}}>
+              类目名称：
+              <Select allowClear value={queryForm.category} style={{width: '200px'}} onChange={(value) => changeQuery({category: value})}>
+                {
+                  category.map(item => <Select.Option value={item.value}>{item.lable}</Select.Option>)
+                }
+              </Select>
+            </span>
+            <Button type='primary' htmlType="submit" onClick={query} style={{marginRight: '10px'}}>搜索</Button>
             <Button type='primary' htmlType="submit" onClick={() => setOpen(true)}>添加产品</Button>
           </div>
           <ul className={styles.imgContent}>
@@ -177,6 +224,8 @@ const Goods: React.FC = () => {
                 </div>
                 <h3 className={styles.title}>{item.title}</h3>
                 <p className={styles.pText}>{item.details}</p>
+                <p className={styles.pText}>品牌：{item.brand}</p>
+                <p className={styles.pText}>类目：{item.category}</p>
                 <div style={{textAlign: 'center'}}>
                   <Button type="primary" style={{marginRight: '10px'}} onClick={() => editGoodsHandler(item)}>编辑</Button>
                   <Button danger onClick={() => deleteGoodsHandler(item)}>删除</Button>
@@ -222,15 +271,23 @@ const Goods: React.FC = () => {
           {/* <Form.Item label="是否置顶" name='top'>
             <Checkbox checked>Checkbox</Checkbox>
           </Form.Item> */}
+          <Form.Item label="商品品牌" name='brand'>
+            <Select style={{width: '70%', marginRight: '10px'}}>
+              {
+                brand.map(item => <Select.Option value={item.value}>{item.lable}</Select.Option>)
+              }
+            </Select>
+          </Form.Item>
           <Form.Item rules={[{ required: true}]} label="商品类目" name='category'>
             <Select style={{width: '70%', marginRight: '10px'}}>
-              <Select.Option value="demo">Demo</Select.Option>
+              {
+                category.map(item => <Select.Option value={item.value}>{item.lable}</Select.Option>)
+              }
             </Select>
-            {/* <Button>添加类目</Button> */}
           </Form.Item>
           <Form.Item rules={[{ required: true}]} label="Upload" valuePropName="fileList" getValueFromEvent={normFile} name="images">
             <Upload
-              action={`${process.env.REACT_APP_API_URL}/api/sys/user/uploadImage`}
+              action={`${process.env.REACT_APP_API_URL}${process.env.REACT_APP_API_PRE}/sys/user/uploadImage`}
               listType="picture-card"
               headers={{
                 token

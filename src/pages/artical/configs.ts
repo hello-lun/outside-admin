@@ -6,12 +6,17 @@ export enum ArticalTypeEnum {
   SHUANGYU = 'shuangyu',
   SHORTSTORY = 'shortStory',
   REACTDOC = 'react',
+  IELTS = 'ielts',
 }
 
 export const articalTypes = [
   {
     label: '童话故事',
     value: ArticalTypeEnum.FAIRY,
+  },
+  {
+    label: '雅思阅读',
+    value: ArticalTypeEnum.IELTS,
   },
   {
     label: '名人传记',

@@ -56,3 +56,9 @@ export function localStorageSetter<T>(name: string, data: T) {
   } catch(e) {
   }
 }
+
+export function sleep(time = 1000) {
+  return new Promise((r, j) => {
+    setTimeout(r, time);
+  });
+}

@@ -1,0 +1,107 @@
+
+.pagination {
+  :global {
+    .ant-pagination-options-size-changer {
+      display: none;
+    }
+  }
+}
+
+.main {
+  height: 100%;
+  // padding: 20px 20px;
+}
+
+.word {
+  flex: 1;
+  padding: 20px 30px;
+  white-space: pre-line;
+  overflow: auto;
+
+  .wordMain {
+    width: 50%;
+    float: left;
+  }
+
+  .wordMainItem {
+    width: 80%;
+    margin: 0 auto;
+  }
+}
+
+.header {
+  padding: 20px 0 0 0;
+  text-align: center;
+}
+
+.pageWrapper {
+  background-color: #ffc760;
+  margin: 0 auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  :first-child {
+    // width: 60%;
+  }
+
+  :global {
+    .ant-pagination {
+      display: inline-block;
+      width: 45%;
+      margin: 0 auto;
+    }
+  }
+}
+
+.remberButton {
+  vertical-align: top;
+}
+
+.word-content {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 创建5列，每列宽度相同 */
+  gap: 0 10px; /* 行间隙为0，列间隙为10px */
+
+  p {
+    margin: 5px 0;
+  }
+}
+
+.word-item {
+  box-sizing: border-box; 
+  margin-bottom: 10px;
+
+  p {
+    background-color: orange;
+    margin: 0;
+    padding: 5px 5px;
+  }
+}
+
+
+.word-extra {
+  padding-left: 20px;
+  color: #0000c9;
+  max-height: 150px;
+  overflow: auto;
+  
+  &--active {
+    line-height: 25px;
+  }
+
+  &--extra {
+    line-height: 25px;
+    color: #1b7c9d;
+  }
+}
+
+.dashed-border {
+  border: 1px dashed #000; /* 2px宽度的虚线边框，颜色为#999（灰色） */
+  margin: 5px 0;
+}
+
+.word-text {
+  font-weight: 500;
+  font-size: 20px;
+}

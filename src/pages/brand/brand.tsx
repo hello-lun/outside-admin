@@ -3,36 +3,29 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Button,
   Drawer,
-  Checkbox,
-  DatePicker,
+  Typography,
   Form,
   Input,
   FormInstance,
   Spin,
-  Select,
-  Slider,
-  Switch,
-  TreeSelect,
+  Table,
   Upload,
 } from 'antd';
 import { useToken } from '@/hooks/useToken';
-import styles from './staff.module.scss';
+import styles from './brand.module.scss';
 import { get } from 'lodash-es';
-import { addStaff, editStaff, getStaff, deleteStaff } from '@/service/staff'; 
+import { addBrand, editBrand, getBrand, deleteBrand } from '@/service/brand'; 
 import { catchError } from '@/utils/helper';
+import type { ColumnsType } from 'antd/es/table';
 
 const baseUrl = `${process.env.REACT_APP_IMG_URL}${process.env.REACT_APP_API_PRE}/`;
 
 interface IFormData {
   id?: number;
-  title: string;
-  details: string;
-  name: string;
-  img: string | string[];
-  wechat: string;
-  phone: string;
-  whatsapp: string;
-  email: string;
+  lable: string;
+  value: string;
+  parentId: string;
+  img: string | any[];
 }
 
 const normFile = (e: any) => {
@@ -43,20 +36,16 @@ const normFile = (e: any) => {
 };
 
 const initialValues: IFormData = {
-  title: '',
-  details: '',
-  name: '',
+  lable: '',
+  value: '',
+  parentId: '',
   img: [],
-  wechat: '',
-  phone: '',
-  whatsapp: '',
-  email: '',
 }
 
 const Goods: React.FC = () => {
   const [componentDisabled, setComponentDisabled] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
-  const [staffs, setStaff] = useState<any[]>([]);
+  const [tableData, setTableData] = useState<any[]>([]);
   const token = useToken();
   const [formData, setFormData] = useState<IFormData>({...initialValues});
   const formRef = React.useRef<FormInstance>(null);
@@ -64,11 +53,9 @@ const Goods: React.FC = () => {
 
   const getData = async () => {
     setSpinning(true);
-    const [, res] = await catchError<any>(getStaff());
-    setStaff(res.map((item: any) => ({
-      ...item,
-    })));
+    const [, res] = await catchError<any>(getBrand());
     setSpinning(false);
+    setTableData(res);
   }
 
   useEffect(() => {
@@ -81,23 +68,82 @@ const Goods: React.FC = () => {
     });
   }, [open]);
 
+  const remove = async (data: IFormData) => {
+    data.id && await deleteBrand(data);
+    getData();
+  }
+
+  const editGoodsHandler = (data: IFormData) => {
+    setOpen(true);
+    setFormData({
+      ...data,
+      img: (data.img as string)?.split(',').map(i => ({url: `${baseUrl}${i}`})),
+    });
+  }
+
+  const columns: ColumnsType<IFormData> = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      key: 'id',
+      width: '100px'
+    },
+    {
+      title: '品牌名',
+      dataIndex: 'lable',
+      key: 'lable',
+    },
+    {
+      title: '品牌key',
+      dataIndex: 'value',
+      key: 'value',
+    },
+    {
+      title: '品牌图片',
+      dataIndex: 'img',
+      key: 'img',
+      render(data) {
+        return <img style={{width: '100px'}} src={baseUrl + data}></img>
+      },
+    },
+    {
+      title: 'operation',
+      dataIndex: 'operation',
+      key: 'operation',
+      width: '110px',
+      render: (_: any, record: IFormData) => {
+        return <span>
+          <Typography.Link onClick={() => editGoodsHandler(record)}>
+            编辑
+          </Typography.Link>
+          ｜
+          <Typography.Link onClick={() => remove(record)}>
+            删除
+          </Typography.Link>
+        </span>
+      },
+    },
+  ];
+  
   const finishHandler = async (data: any) => {
     const { img } = data;
     let promiseHandler = null;
     let postData = {};
     // 批量添加
     if (formData.id) {
-      promiseHandler = editStaff;
+      promiseHandler = editBrand;
       postData = {
         ...data,
         id: formData.id,
+        parentId: data.parentId || 0,
         img: get(img[0], 'response.data.src'),
       };
     } else {
-      promiseHandler = addStaff;
+      promiseHandler = addBrand;
       postData= {
         ...data,
         id: formData.id,
+        parentId: data.parentId || 0,
         img: get(img[0], 'response.data.src'),
       }
     }
@@ -110,45 +156,21 @@ const Goods: React.FC = () => {
     }
   }
 
-  const editGoodsHandler = (data: any) => {
-    setOpen(true);
-    setFormData({
-      ...data,
-      img: data.img?.split(',').map((i: string) => ({url: `${baseUrl}${i}`})),
-    });
-  }
-
   const onClose = () => {
     setOpen(false);
     formRef.current && formRef.current.resetFields();
   }
 
-
   return (
     <>
       <Spin tip="数据加载中..." spinning={spinning}>
         <div className={styles.content}>
-          <div style={{paddingLeft: "40px"}}>
-            <Button type='primary' htmlType="submit" onClick={() => setOpen(true)}>添加员工</Button>
+          <div style={{padding: "0 0 20px 0"}}>
+            <Button type='primary' htmlType="submit" onClick={() => setOpen(true)}>添加品牌</Button>
           </div>
-          <ul className={styles.imgContent}>
-            {
-              staffs.map((item: any) => <li key={item.id}>
-                <div style={{position: 'relative'}}>
-                  <img src={baseUrl + item.img} alt="" />
-                  {/* <div className={styles.mask}>
-                    <Button danger onClick={() => deleteStaff(item)}>联系我</Button>
-                  </div> */}
-                </div>
-                <h3 className={styles.title}>{item.name}</h3>
-                <p className={styles.pText}>{item.title}</p>
-                <div style={{textAlign: 'center'}}>
-                  <Button type="primary" style={{marginRight: '10px'}} onClick={() => editGoodsHandler(item)}>编辑</Button>
-                  <Button danger onClick={() => deleteStaff(item)}>删除</Button>
-                </div>
-              </li>)
-            }
-          </ul>
+          <div className={styles.imgContent}>
+            <Table bordered columns={columns} dataSource={tableData} />
+          </div>
         </div>
       </Spin>
       <Drawer
@@ -167,28 +189,13 @@ const Goods: React.FC = () => {
           onFinish={finishHandler}
           style={{ maxWidth: 600, margin: '0 auto' }}
         >
-          <Form.Item rules={[{ required: true}]} label="员工姓名" name='name'>
+          <Form.Item rules={[{ required: true}]} label="品牌名称" name='lable'>
             <Input />
           </Form.Item>
-          <Form.Item rules={[{ required: true }]} label="员工title" name='title'>
-            <Input.TextArea rows={3} />
-          </Form.Item>
-          <Form.Item rules={[{ required: true}]} label="员工介绍" name='details'>
-            <Input.TextArea rows={4} />
-          </Form.Item>
-          <Form.Item rules={[{ required: true}]} label="电话" name='phone'>
-            <Input type='number' />
-          </Form.Item>
-          <Form.Item rules={[{ required: true}]} label="whatsapp" name='whatsapp'>
-            <Input type='number' />
-          </Form.Item>
-          <Form.Item rules={[{ required: true}]} label="email" name='email'>
+          <Form.Item rules={[{ required: true }]} label="品牌key" name='value'>
             <Input />
           </Form.Item>
-          <Form.Item label="wechat" name='wechat'>
-            <Input />
-          </Form.Item>
-          <Form.Item rules={[{ required: true}]} label="Upload" valuePropName="fileList" getValueFromEvent={normFile} name="img">
+          <Form.Item label="品牌图片" valuePropName="fileList" getValueFromEvent={normFile} name="img">
             <Upload
               action={`${process.env.REACT_APP_API_URL}${process.env.REACT_APP_API_PRE}/sys/user/uploadImage`}
               listType="picture-card"

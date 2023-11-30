@@ -4,10 +4,17 @@ import { MenuUnfoldOutlined } from '@ant-design/icons';
 import styles from './hoverMenu.module.scss';
 import { Drawer } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { useRouterStore } from '@/store/router';
+import { IRouteObject } from '@/router/configs';
+
+const path = '/others';
 
 const HoverMenu: React.FunctionComponent = () => {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const othersRouterConfigs: IRouteObject[] = useRouterStore(state => {
+    return state.routers.find(item => item.path === path)?.children || [];
+  });
 
   function onClose() {
     setOpen(false);
@@ -23,11 +30,11 @@ const HoverMenu: React.FunctionComponent = () => {
   return <div className={styles.menu}>
     <Drawer title="菜单" placement="right" onClose={onClose} open={open}>
       <div onClick={itemClick} className={styles.menuItem}>
-        <p data-path="/others/artical">阅读</p>
-        <p data-path="/others/novel">小说</p>
-        <p data-path="/others/word">记单词</p>
-        <p data-path="/others/goodsCount">订单详情</p>
-        <p data-path="/others/milk">录入奶粉</p>
+        {
+          othersRouterConfigs?.map(item => {
+            return <p data-path={item.path} key={item.path}>{item.name}</p>
+          })
+        }
       </div>
     </Drawer>
     <MenuUnfoldOutlined onClick={() => setOpen(true)} />

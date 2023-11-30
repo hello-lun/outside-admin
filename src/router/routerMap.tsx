@@ -7,6 +7,10 @@ const Milk = () => import('../pages/milk/milk');
 const GoodsCount = () => import('../pages/goodsCount/goodsCount');
 const GoodsAdd = () => import('../pages/goods/add/add');
 const Staff = () => import('../pages/staff/staff');
+const Category = () => import('../pages/category/category');
+const Brand = () => import('../pages/brand/brand');
+const Banners = () => import('../pages/banners/banners');
+const NewWord = () => import('../pages/new-word/word');
 
 type MyObjectType = {
   word: JSX.Element;
@@ -26,6 +30,10 @@ const routerMap: MyObjectType = {
   goodsCount: lazyWrapper(GoodsCount),
   addGoods: lazyWrapper(GoodsAdd),
   staff: lazyWrapper(Staff),
+  category: lazyWrapper(Category),
+  brand: lazyWrapper(Brand),
+  banners: lazyWrapper(Banners),
+  newWord: lazyWrapper(NewWord),
 };
 
 export const formatRouterCom = (key: string) => {
