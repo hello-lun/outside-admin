@@ -15,6 +15,7 @@ import TranslateLayer from '@/components/translateLayer/translateLayer';
 import NewWordCom from '@/components/new-word/new-word';
 import { isMobile } from '@/utils/helper';
 import { localStorageGetter } from '@/utils/helper';
+import { useUserStore } from '@/store/user';
 
 const SAVA_TIMES = 1000 * 60;
 
@@ -33,9 +34,11 @@ export default function Artical() {
   const [articalData, setArticalData] = useState<{
     text: string;
     title: string;
+    userWordRecordsId: string;
   }>({
     text: '',
-    title: ''
+    title: '',
+    userWordRecordsId: '',
   });
   const [newWords, setNewWords] = useState<Array<string>>([]);
   const allArtical = useRef<
@@ -43,13 +46,15 @@ export default function Artical() {
       title: string;
       text: string;
       id: number;
+      userWordRecordsId: string;
       words: string;
     }[]
   >([]);
   const [curWord, setCurWord] = useState<string[]>([]);
   const setTimeoutHandler = useRef<ReturnType<typeof setTimeout>>();
   const navigate = useNavigate();
-
+  const userData = useUserStore.getState();
+  
   useEffect(() => {
     if(isMobile()) {
       setLayout({
@@ -86,13 +91,17 @@ export default function Artical() {
 
   function getArticalsData(data: any) {
     setSpinning(true);
-    getArticals(data).then((res: any) => {
+    getArticals({
+      ...data,
+      userId: userData.user.currentUser.id
+    }).then((res: any) => {
       const curData = res[curPageNum.current] || res[0];
       allArtical.current = res;
       setTotal(res.length - 1);
       setArticalData({
         text: filterHtml(curData?.text),
-        title: curData?.title
+        title: curData?.title,
+        userWordRecordsId: curData.userWordRecordsId
       });
       setNewWords(curData?.words ? JSON.parse(curData?.words).words : []);
     }).finally(() => {
@@ -110,7 +119,9 @@ export default function Artical() {
       saveArtical({
         id: tempData.id,
         ...data,
-        words: JSON.stringify(data)
+        words: JSON.stringify(data),
+        userId: userData.user.currentUser.id,
+        userWordRecordsId: articalData.userWordRecordsId
       });
     }
   }
@@ -144,7 +155,8 @@ export default function Artical() {
     const cleanedHtmlString = filterHtml(curArticalData?.text);
     setArticalData({
       text: cleanedHtmlString,
-      title: curArticalData?.title
+      title: curArticalData?.title,
+      userWordRecordsId: curArticalData.userWordRecordsId
     });
     setNewWords(curArticalData?.words ? JSON.parse(curArticalData?.words).words : []);
   }

@@ -71,7 +71,7 @@ axiosInstance.interceptors.response.use(
       return http(originalRequest);
     }
     // 当status为400时，刷新token也过期后，跳转登陆页面
-    if (status === 400) {
+    if (status === 410) {
       useUserStore.getState().removeUser();
       window.location.href = '/login';
     }
