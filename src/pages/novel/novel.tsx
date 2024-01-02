@@ -16,6 +16,7 @@ import { getNovel, getPDFMarkDetail } from '../../service/translate';
 import { updateNovelMark, getNovelMark } from '../../service/novel';
 import { isMobile } from '@/utils/helper';
 import { localStorageGetter } from '@/utils/helper';
+import './normal.scss';
 
 const SAVA_TIMES = 1000 * 60;
 

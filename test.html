@@ -1,15 +1,34 @@
 <button id="speakButton">Speak</button>
 <script>
-  function speak(text) {
-    const synth = window.speechSynthesis;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-GB';
-    utterance.rate = 0.7; // 比正常速度慢
+  // 输入字符串
+let inputString = 'a dsf vdfvdfvdf svdsfvd frhbd svd';
 
-    synth.speak(utterance);
-  }
+// 动态变量
+let dynamicVariable = 'svd';
 
-  document.getElementById('speakButton').addEventListener('click', () => {
-    speak('accessory hello sun line');
-  });
+// 创建动态 RegExp 对象
+let pattern = new RegExp(`\\b${dynamicVariable}\\b`, 'g');
+
+// 使用 RegExp 对象进行替换
+let result = inputString.replace(pattern, 'ding');
+
+// 输出结果
+console.log(result, 89);
+
+// 输入字符串
+// let inputString = 'a dsf vdfvdfvdf svdsfvd frhbd bsvd';
+
+// // 动态变量
+// let dynamicVariable = 'bsvd';
+
+// // 创建动态 RegExp 对象
+// let pattern = new RegExp(`\\b${dynamicVariable}\\b`, 'g');
+
+// // 使用 RegExp 对象进行替换
+// let result = inputString.replace(pattern, 'ding');
+
+// // 输出结果
+// console.log(result);
+
+
 </script>

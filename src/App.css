@@ -3,16 +3,6 @@
   -webkit-touch-callout: none;
 }
 
-.highlight, .artical-highlight {
-  background-color: #b6ff93;
-  padding: 3px 5px;
-  border-radius: 5px;
-}
-
-.artical-highlight {
-  background-color: #ff8b8b;
-}
-
 /* 修改滚动条轨道的样式 */
 ::-webkit-scrollbar {
   /* width: 10px; 滚动条宽度 */

@@ -7,6 +7,7 @@ import axios, {
 import { useUserStore } from '@/store/user';
 import { localStorageGetter } from '@/utils/helper';
 import { getRefreshToken } from '@/service/auth';
+import { message } from 'antd';
 
 axios.defaults.baseURL = process.env.REACT_APP_API_URL + '/req';
 axios.defaults.headers.head['Content-Type'] = 'application/json;chartset=utf-8';
@@ -44,6 +45,7 @@ axiosInstance.interceptors.response.use(
   (res: AxiosResponse) => {
     const { data } = res;
     if (data.code === 500) {
+      message.error('请求出错');
       return Promise.reject(data);
     }
     return data.data;
@@ -52,29 +54,32 @@ axiosInstance.interceptors.response.use(
     const {
       response: { status, data }
     } = err;
+    message.error(`错误码：${status}，请求出错！`);
     const originalRequest = err.config;
     if (status === 401 || status === 403) {
-      if (!refreshTokenRquesting) {
-        refreshTokenRquesting = true;
-        const userData = useUserStore.getState();
-        try {
-          const res = await getRefreshToken({
-            refreshToken: userData.user.refreshToken ? userData.user.refreshToken : localStorageGetter('system_data', 'refreshToken')
-          });
-          useUserStore.getState().updateUser({authorization: res});
-        } catch(e) {
-          return Promise.reject(e);
-        } finally {
-          refreshTokenRquesting = false;
-        }
-      }
-      return http(originalRequest);
-    }
-    // 当status为400时，刷新token也过期后，跳转登陆页面
-    if (status === 410) {
       useUserStore.getState().removeUser();
       window.location.href = '/login';
+      // if (!refreshTokenRquesting) {
+      //   refreshTokenRquesting = true;
+      //   const userData = useUserStore.getState();
+      //   try {
+      //     const res = await getRefreshToken({
+      //       refreshToken: userData.user.refreshToken ? userData.user.refreshToken : localStorageGetter('system_data', 'refreshToken')
+      //     });
+      //     useUserStore.getState().updateUser({authorization: res});
+      //   } catch(e) {
+      //     return Promise.reject(e);
+      //   } finally {
+      //     refreshTokenRquesting = false;
+      //   }
+      // }
+      // return http(originalRequest);
     }
+    // 当status为400时，刷新token也过期后，跳转登陆页面
+    // if (status === 410) {
+    //   useUserStore.getState().removeUser();
+    //   window.location.href = '/login';
+    // }
     return Promise.reject(err.response.data);
   }
 );

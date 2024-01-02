@@ -48,7 +48,6 @@
   :global {
     .ant-pagination {
       display: inline-block;
-      width: 45%;
       margin: 0 auto;
     }
   }
@@ -56,6 +55,14 @@
 
 .remberButton {
   vertical-align: top;
+  padding: 5px 10px;
+}
+
+@media screen and (max-width: 768px) {
+  .word-content {
+    grid-template-columns: 1fr !important; /* 创建5列，每列宽度相同 */
+  }
+
 }
 
 .word-content {
@@ -75,7 +82,7 @@
   p {
     background-color: orange;
     margin: 0;
-    padding: 5px 5px;
+    padding: 5px 10px;
   }
 }
 

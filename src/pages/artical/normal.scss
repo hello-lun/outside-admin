@@ -1,0 +1,43 @@
+.translate-wrapper {
+  position: relative;
+  display: inline-block;
+
+  &:hover {
+    .trans-text--hide {
+      display: inline-block;
+    }
+  }
+}
+
+.trans-text {
+  position: absolute;
+  width: 100%;
+  top: -13px;
+  text-align: center;
+  color: #bf1041;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &--hide {
+    @extend .trans-text;
+    display: none;
+  }
+
+  &--show {
+    @extend .trans-text;
+    display: inline-block;
+  }
+}
+
+.highlight {
+  background-color: #b6ff93;
+  padding: 3px 5px;
+  border-radius: 5px;
+}
+
+.artical-highlight {
+  background-color: #ff91f4;
+  padding: 3px 5px;
+  border-radius: 5px;
+}

@@ -6,7 +6,7 @@
 // // 记住当前页面
 import React, { useState, useRef, useEffect, ElementRef } from 'react';
 import styles from './artical.module.scss';
-import { Pagination, Button, Spin, Select, Space, Col, Row } from 'antd';
+import { Pagination, Button, Modal, Select, Space, Col, Row, Input, message } from 'antd';
 import { useOnceEffect } from '@/hooks/onceEffect';
 import { getArticals, saveArtical } from '../../service/translate';
 import { useNavigate } from 'react-router-dom';
@@ -14,32 +14,54 @@ import { articalTypes, ArticalTypeEnum } from './configs';
 import TranslateLayer from '@/components/translateLayer/translateLayer';
 import NewWordCom from '@/components/new-word/new-word';
 import { isMobile } from '@/utils/helper';
-import { localStorageGetter } from '@/utils/helper';
+import { localStorageGetter, catchJsonExep } from '@/utils/helper';
 import { useUserStore } from '@/store/user';
+import { askGoogleAi } from '@/utils/googleAi';
+import { catchError } from '@/utils/helper';
+import './normal.scss';
 
 const SAVA_TIMES = 1000 * 60;
-
+const { TextArea } = Input;
 interface AnyObject {
   backgroundColor?: string;
   [key: string]: any;
 }
 
+const defaultFormData = {
+  title: '',
+  text: '',
+  id: '',
+};
+
+let transFlag = false;
+let newWordMarkFlag = false;
+
 export default function Artical() {
   const [spinning, setSpinning] = useState(false);
+  const [editLoading, setEditLoading] = useState(false);
+  const [open, setOpen] = useState(false);
   const [newWordStyle, setNewWordStyle] = useState({});
   const [total, setTotal] = useState<number>(0);
-  const [layout, setLayout] = useState<{left: number, right: number}>({left: 4, right: 20});
+  const [layout, setLayout] = useState<{left: number, right: number}>({left: 5, right: 19});
   const curPageNum = useRef<number>(1);
+  const [articalText, setArticalText] = useState('');
   const [articalType, setArticalType] = useState('');
+  const [isEdit, setIsEdit] = useState(false);
   const [articalData, setArticalData] = useState<{
-    text: string;
+    id: number | string;
     title: string;
+    text: string;
     userWordRecordsId: string;
   }>({
-    text: '',
+    id: '',
     title: '',
+    text: '',
     userWordRecordsId: '',
   });
+  const [articalFormData, setArticalFormData] = useState<{
+    title: string;
+    text: string;
+  }>({...defaultFormData});
   const [newWords, setNewWords] = useState<Array<string>>([]);
   const allArtical = useRef<
     {
@@ -68,7 +90,6 @@ export default function Artical() {
   }, [articalData]);
 
   useOnceEffect(() => {
-    eventListener();
     savaMyself();
     curPageNum.current = localStorageGetter('englishInfo', 'articalCurrentPage') || 1;
     const articalType = localStorageGetter( 'englishInfo', 'currentType') || ArticalTypeEnum.FAIRY;
@@ -82,12 +103,32 @@ export default function Artical() {
     };
   });
 
-  function eventListener() {
-    document.addEventListener('click', () => {
+  useEffect(() => {
+    const handler = () => {
       isMobile() && setNewWordStyle({display: 'none'});
-      clearHighlights();
-    });
+      if (!newWordMarkFlag && !transFlag) {
+        clearHighlights();
+      }
+      // setArticalText(new String(articalText) as string);
+      // transFlag = false;
+    };
+    document.addEventListener('click', handler);
+
+    return () => {
+      document.removeEventListener('click', handler);
+    }
+  }, [articalText]);
+
+  const addArtical = (isEdit: boolean) => {
+    setIsEdit(isEdit);
+    setOpen(true);
+    if (isEdit) {
+      setArticalFormData({
+        ...articalData,
+      });
+    }
   }
+
 
   function getArticalsData(data: any) {
     setSpinning(true);
@@ -98,12 +139,16 @@ export default function Artical() {
       const curData = res[curPageNum.current] || res[0];
       allArtical.current = res;
       setTotal(res.length - 1);
+      const text = filterHtml(curData?.text);
+      setArticalText(text);
       setArticalData({
-        text: filterHtml(curData?.text),
+        id: curData?.id,
+        text: curData?.text,
         title: curData?.title,
         userWordRecordsId: curData.userWordRecordsId
       });
-      setNewWords(curData?.words ? JSON.parse(curData?.words).words : []);
+      const words = curData?.words ? JSON.parse(curData?.words).words : [];
+      setNewWords(words);
     }).finally(() => {
       setSpinning(false);
     });
@@ -116,7 +161,7 @@ export default function Artical() {
   function updateNewWords(data: object) {
     const tempData = allArtical.current?.[curPageNum.current];
     if (tempData.id) {
-      saveArtical({
+      return saveArtical({
         id: tempData.id,
         ...data,
         words: JSON.stringify(data),
@@ -124,6 +169,7 @@ export default function Artical() {
         userWordRecordsId: articalData.userWordRecordsId
       });
     }
+    return Promise.reject();
   }
 
   function removeAllAttributes(htmlString: string) {
@@ -150,13 +196,16 @@ export default function Artical() {
 
   function onChange(page: number) {
     // navigate('/word');
+    transFlag = false;
     curPageNum.current = page;
     const curArticalData = allArtical.current?.[page];
     const cleanedHtmlString = filterHtml(curArticalData?.text);
+    setArticalText(cleanedHtmlString);
     setArticalData({
-      text: cleanedHtmlString,
+      id: curArticalData?.id,
       title: curArticalData?.title,
-      userWordRecordsId: curArticalData.userWordRecordsId
+      userWordRecordsId: curArticalData.userWordRecordsId,
+      text: curArticalData.text,
     });
     setNewWords(curArticalData?.words ? JSON.parse(curArticalData?.words).words : []);
   }
@@ -186,7 +235,7 @@ export default function Artical() {
     elementsToSearch.forEach(element => {
       const originalText = element.innerHTML;
       if (!originalText.includes(searchTerm)) return;
-      const highlightedText = originalText.replace(searchRegex, '<span class="highlight">$&</span>'); // 用<span>标签包裹匹配项来实现高亮
+      const highlightedText = originalText.replace(searchRegex, `<span class="highlight">$&</span>`); // 用<span>标签包裹匹配项来实现高亮
       element.innerHTML = highlightedText;
     });
 
@@ -195,7 +244,7 @@ export default function Artical() {
 
   function clearHighlights() {
     const highlightedElements = document.querySelectorAll('.highlight');
-
+    // const translateWrapperElements = document.querySelectorAll('.translate-wrapper');
     highlightedElements.forEach(element => {
       element.outerHTML = element.innerHTML; // 移除<span>标签，恢复原始文本
     });
@@ -222,13 +271,30 @@ export default function Artical() {
 
   function newWordClick(e: any, text = '') {
     e.stopPropagation();
-    const word = text.split('：')[0];
     clearHighlights();
+    const word = text.split('：')[0];
     setCurWord([word]);
     highlightSearchTerm(word);
+    newWordMarkFlag = false;
+    transFlag = false;
   }
 
-  function addNewWord({translator}: any) {
+  async function createdExtraData(text: string) {
+    const extraData: { strong: boolean, example: string, translate: string } = {
+      strong: false,
+      example: '',
+      translate: '',
+    };
+    const [err, res] = await catchError(askGoogleAi(`Please use the word "${text}" to create a very simple example sentence, and then use "&" to splice the Chinese translation of this example sentence to the end of the example sentence without any other redundant explanation, such as "i love you & I love you"`));
+    if (!err) {
+      const [e, t] = res.split('&');
+      extraData.example = e;
+      extraData.translate = t;
+    }
+    return extraData;
+  }
+
+  async function addNewWord({translator}: any) {
     let translateText = translator;
     if (typeof translator !== 'string') {
       let extraWord = '';
@@ -238,7 +304,11 @@ export default function Artical() {
       translateText = `${translator?.text}#${extraWord}`;
     }
     const tempNewWords = new Set(newWords);
-    tempNewWords.add(`${curWord[0]}：${translateText}`);
+    const text = curWord[0];
+    // 额外的数据
+    const [, extraData] = await catchError(createdExtraData(text));
+    console.log('extraData: ', extraData);
+    tempNewWords.add(`${text}：${translateText}@${catchJsonExep(extraData)}`);
     const data = Array.from(tempNewWords);
     newWordHandler(data);
   }
@@ -259,9 +329,9 @@ export default function Artical() {
     newWordHandler(data);
   }
 
-  function newWordHandler(data: Array<string>) {
+  async function newWordHandler(data: Array<string>) {
+    await updateNewWords({ words: data });
     setNewWords(data);
-    updateNewWords({ words: data });
   }
 
   function handleSelectChange(value: string) {
@@ -274,12 +344,49 @@ export default function Artical() {
 
   function newWordVisible(e: any) {
     e.stopPropagation();
-    setNewWordStyle({
-      display: 'block',
-      position: 'fixed',
-      left: 0,
-      top: 0,
-    });
+    if (isMobile()) {
+      return setNewWordStyle({
+        display: 'block',
+        position: 'fixed',
+        left: 0,
+        top: 0,
+      });
+    }
+    if (newWordMarkFlag) {
+      setArticalText(new String(articalText) as string);
+    } else {
+      const transList = newWords.map((item = '') => {
+        const strs = item.split('@');
+        const extraStr = strs[1];
+        const extraData = extraStr ? catchJsonExep(extraStr, 'parse') : {
+          strong: false,
+        };
+        return {
+          value: item.split('#')?.[0]?.split('：'),
+          ...extraData,
+        };
+      });
+      const elementsToSearch = document.querySelectorAll('#artical-content *'); // 选择要搜索的所有内容元素
+      transList.forEach((item: any) => {
+        const text = item.value[0];
+        const transText = item.value[1];
+        const searchRegex = new RegExp(text, 'gi'); // 创建一个全局不区分大小写的正则表达式
+        elementsToSearch.forEach(element => {
+          const originalText = element.innerHTML;
+          if (!originalText.includes(text)) return;
+          const highlinghtStyle = `background-color: ${item.strong ? '#a1aaed' : '#fff'}`;
+          const highlightedText = originalText.replace(
+            searchRegex,
+            `<span class="translate-wrapper">
+              <span class='trans-text--hide'>${transText}</span>
+              <span class="highlight" style="${highlinghtStyle}">$&</span>
+            </span>`
+          ); // 用<span>标签包裹匹配项来实现高亮
+          element.innerHTML = highlightedText;
+        });
+      });
+    }
+    newWordMarkFlag = !newWordMarkFlag;
   }
 
   function rememberHandler() {
@@ -293,11 +400,46 @@ export default function Artical() {
     );
   }
 
+  const translateNewWords = (e: any) => {
+    e.stopPropagation();
+    if (transFlag) {
+      setArticalText(new String(articalText) as string);
+    } else {
+      const transList = newWords.map((item = '') => item.split('#')?.[0]?.split('：'));
+      const elementsToSearch = document.querySelectorAll('#artical-content *'); // 选择要搜索的所有内容元素
+      transList.forEach((item: any) => {
+        const text = item[0];
+        const transText = item[1];
+        const searchRegex = new RegExp(text, 'gi'); // 创建一个全局不区分大小写的正则表达式
+        elementsToSearch.forEach(element => {
+          const originalText = element.innerHTML;
+          if (!originalText.includes(text)) return;
+          const highlightedText = originalText.replace(searchRegex, `<span class="translate-wrapper" style="border-bottom: 1px dashed #bf1041;"><span class='trans-text--show'>${transText}</span><span>$&</span></span>`); // 用<span>标签包裹匹配项来实现高亮
+          element.innerHTML = highlightedText;
+        });
+      });
+    }
+    transFlag = !transFlag;
+  }
+
+  const onMarkStrong = (index: number, data: any) => {
+    const newWordItem = newWords[index];
+    const strs = newWordItem.split('@');
+    const extraStr = strs[1];
+    const extraData = extraStr ? catchJsonExep(extraStr, 'parse') : {
+      strong: false,
+    };
+    extraData.strong = !data.strong;
+    newWords[index] = `${strs[0]}@${catchJsonExep(extraData)}`;
+    newWordHandler([...newWords]);
+  }
+
   const genNewWordCom = () => {
     return <div style={newWordStyle} className={styles.leftContent}>
       <NewWordCom
         data={newWords}
         newWordItemClick={newWordClick}
+        onMarkStrong={onMarkStrong}
         onRemoveNewWord={removeNewWord}
         changeNewWord={modalOkHandler} />
     </div>
@@ -314,7 +456,7 @@ export default function Artical() {
           }`
         }
       </style>
-      <p id='textDom' dangerouslySetInnerHTML={{ __html: articalData.text }}></p>
+      <p id='textDom' dangerouslySetInnerHTML={{ __html: articalText }}></p>
     </div>;
   }
 
@@ -336,9 +478,56 @@ export default function Artical() {
     </Row>
   }
 
+  const handleOk = async () => {
+    try {
+      setEditLoading(true);
+      await saveArtical({
+        id: isEdit ? articalData.id : null,
+        type: articalType,
+        userId: userData.user.currentUser.id,
+        ...articalFormData,
+      });
+      setIsEdit(false);
+      getArticalsData({
+        type: articalType,
+      });
+    } finally {
+      setEditLoading(false);
+      setOpen(false);
+    }
+  }
+
+  const handleCancel = () => {
+    setOpen(false);
+    setIsEdit(false);
+    setArticalFormData({
+      ...defaultFormData,
+    });
+  }
+  
   return (
     <div className={styles.main}>
-      <TranslateLayer onAddNewWord={addNewWord} onMarkArtical={markArtical} onWordChange={setCurWord} />
+      <Modal
+        open={open}
+        title={isEdit ? "编辑文章" : "新增文章"}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        footer={[
+          <Button key="submit" type="primary" loading={editLoading} onClick={handleOk}>
+            添加
+          </Button>,
+        ]}
+      > 
+      <div>
+        标题：<TextArea rows={1} value={articalFormData.title} onChange={(e) => setArticalFormData({...articalFormData, title: e.target.value})}></TextArea>
+        <div style={{margin: '20px 0'}}></div>
+        文章内容：<TextArea rows={10} value={articalFormData.text} onChange={(e) => setArticalFormData({...articalFormData, text: e.target.value})}></TextArea>
+      </div> 
+      </Modal>
+      <TranslateLayer
+        onAddNewWord={addNewWord}
+        onMarkArtical={markArtical}
+        onWordChange={setCurWord} />
       <div className={styles.header}>
         <Pagination
           disabled={spinning}
@@ -361,6 +550,15 @@ export default function Artical() {
         </Button>
         <Button type='link' onClick={newWordVisible} className={styles.remberButton}>
           生词
+        </Button>
+        <Button type='link' onClick={translateNewWords} className={styles.remberButton}>
+          翻译
+        </Button>
+        <Button type='link' onClick={() => addArtical(false)} className={styles.remberButton}>
+          添加文章
+        </Button>
+        <Button type='link' onClick={() => addArtical(true)} className={styles.remberButton}>
+          编辑文章
         </Button>
       </div>
       {

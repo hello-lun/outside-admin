@@ -1,20 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './word.module.scss';
-import { Pagination, Button, Input, Select, Tooltip, Modal } from 'antd';
+import { Pagination, Button, Input, Select, Tooltip, Modal, Checkbox } from 'antd';
 import { useOnceEffect } from '@/hooks/onceEffect';
 import { translatePDF, savePDFDetail, getPDFMarkDetail } from '../../service/translate';
 import SpeakWord from '@/components/speakWord';
 import { useNavigate } from 'react-router-dom';
 import TranslateLayer from '@/components/translateLayer/translateLayer';
 import { localStorageGetter } from '@/utils/helper';
-import { getNewWord, editNewWord } from '@/service/novel';
+import { getNewWord, editNewWord, removeNewWord } from '@/service/novel';
+import { useUserStore } from '@/store/user';
+import { translateText } from '@/utils/translator';
 
 const { TextArea } = Input;
 const SAVA_TIMES = 1000 * 60;
 
 const SIZE = 100;
-
-let abc = false;
 
 interface AnyObject {
   backgroundColor?: string;
@@ -28,6 +28,21 @@ interface WordObj {
   isTitle?: boolean
 }
 
+type IReqFormData = {
+  text?: string;
+  translation?: string
+  extra?: Array<string>
+  othersTranslation?: Array<string>
+}
+
+
+type IFormData = {
+  auto?: boolean
+  text?: string;
+  translation?: string
+  othersTranslation?: string
+}
+
 let itemData: any = null;
 
 function useRequest<T>(p: (data: any) => Promise<T>, configs: any) {
@@ -38,30 +53,38 @@ function useRequest<T>(p: (data: any) => Promise<T>, configs: any) {
 
 export default function Sample() {
   const [total, setTotal] = useState<number>(0);
-  const [curPageNum, setPageNum] = useState<number>(1);
   const [curWord, setCurWord] = useState<string[]>([]);
   const [spinning, setSpinning] = useState<boolean>(false);
   const [paginationDisabled, setPaginationDisabled] = useState<boolean>(false);
   const [words, setWords] = useState<any[]>([]);
   const navigate = useNavigate();
   const [interval, setInterval] = useState(2000);
+  const [noteModel, setNoteModel] = useState(false);
   const [open, setOpen] = useState(false);
   const [editLoading, setEitLoading] = useState(false);
-  const [textValue, setTextValue] = useState('');
+  const [formData, setFormData] = useState<IFormData>({
+    text: '',
+    translation: '',
+    othersTranslation: ''
+  });
+  const curReadIndex = useRef(0);
+  const userData = useUserStore.getState();
+  const curPageNum = useRef<number>(1);
 
-  const getNewWords = async () => {
+  const getNewWords = async (note?: boolean) => {
     setPaginationDisabled(true);
     try {
       const res = await getNewWord({
-        page: curPageNum,
+        page: curPageNum.current,
         size: SIZE,
-        isRead: 0
+        isRead: 0,
+        isNote: (note !== void 0 ? note : noteModel) ? 1 : 0,
       });
       const list = res?.list.map((item: any) => {
         return {
           ...item,
-          extra: item.extra.split('@'),
-          othersTranslation: item.othersTranslation.split('@'),
+          extra: item.extra?.split('@')?.filter((item: IFormData) => !!item) || [],
+          othersTranslation: item.othersTranslation?.split('@')?.filter((item: IFormData) => !!item) || [],
           active: false
         };
       });
@@ -73,9 +96,19 @@ export default function Sample() {
   }
 
   useEffect(() => {
-    setPageNum(localStorageGetter('englishNewWordInfo', 'wordCurrentPage') || 1);
+    if (!open) itemData = null;
+  }, [open]);
+
+  useEffect(() => {
+    curPageNum.current = localStorageGetter('englishNewWordInfo', 'wordCurrentPage') || 1;
+    getNewWords();
     const handler = () => {
       setCurWord([]);
+      const newWordWrapper = document.querySelectorAll('.new-word-text');
+      const dom = newWordWrapper[curReadIndex.current] as HTMLElement;
+      if (!dom) return;
+      dom.style.color = '';
+      dom.style.fontSize = '';
     }
     document.addEventListener('click', handler);
 
@@ -84,12 +117,9 @@ export default function Sample() {
     }
   }, []);
 
-  useEffect(() => {
-    getNewWords();
-  }, [curPageNum]);
-
   const onPageChange = (page: number) => {
-    setPageNum(page);
+    curPageNum.current = page;
+    getNewWords();
   }
   
   function remberHandler() {
@@ -97,7 +127,7 @@ export default function Sample() {
       'englishNewWordInfo',
       JSON.stringify({
         ...localStorageGetter('englishNewWordInfo'),
-        wordCurrentPage: curPageNum
+        wordCurrentPage: curPageNum.current
       })
     );
   }
@@ -118,11 +148,12 @@ export default function Sample() {
 
   function textItemClick(text: string) {
     setInterval(0);
-    speakWord(text);
+    // speakWord(text);
+    setCurWord([text]);
   }
 
   function moreTrans(index?: number, e?: any) {
-    e.stopPropagation();
+    e && e.stopPropagation();
     const cache = words.map((i: any, num) => {
       if (index === void 0 || index === num) {
         return {
@@ -147,6 +178,7 @@ export default function Sample() {
 
   function audioSuccese(index: number) {
     const length = curWord.length;
+    curReadIndex.current = index;
     if (length <= 1) return;
     const newWordWrapper = document.querySelectorAll('.new-word-text');
     if (index > 0) {
@@ -162,20 +194,45 @@ export default function Sample() {
   }
 
   const handleOk = async () => {
-    await editNewWord({
-      id: itemData.id,
-      translation: textValue
-    });
-    getNewWords();
-    setOpen(false);
+    setEitLoading(true);
+    try {
+      const data = {...formData} as IReqFormData;
+      let translation = data.translation;
+      let othersTranslation = data.othersTranslation;
+      if(!formData.auto && !translation) return;
+      if (formData.auto) {
+        const teranslateData = await translateText(formData.text as string);
+        const textList = teranslateData.translation;
+        const explains = teranslateData?.basic?.explains;
+        translation = textList.join('');
+        othersTranslation = explains;
+      }
+
+      await editNewWord({
+        ...formData,
+        id: itemData?.id,
+        translation: translation,
+        isRead: itemData?.isRead || 0,
+        isNote: noteModel ? 1 : 0,
+        userId: userData.user.currentUser.id,
+        extra: data.extra?.join('@'),
+        othersTranslation: othersTranslation instanceof Array ? othersTranslation.join('@') : othersTranslation,
+      });
+      getNewWords();
+      setOpen(false);
+      setFormData({});
+    } finally {
+      setEitLoading(false);
+    }
   }
   const handleCancel = () => {
     setOpen(false);
+    setFormData({});
   }
 
   const edit = (data: any) => {
     setOpen(true);
-    setTextValue(data.translation);
+    setFormData({...data});
     itemData = data;
   }
 
@@ -188,25 +245,48 @@ export default function Sample() {
     setOpen(false);
   }
 
+  const goToNote = () => {
+    setNoteModel(!noteModel);
+    getNewWords(!noteModel);
+  }
+
+  const addNewWord = () => {
+    setOpen(true);
+  }
+
+  const remove = async (data: any) => {
+    await removeNewWord({id: data.id});
+    getNewWords();
+  }
+
 
   return (
     // <Spin tip='文档加载中...' spinning={spinning}>
       <div className={styles.main}>
         <Modal
-        open={open}
-        title="翻译"
-        onOk={handleOk}
-        onCancel={handleCancel}
-        footer={[
-          <Button key="submit" type="primary" loading={editLoading} onClick={handleOk}>
-            编辑
-          </Button>,
-        ]}
-      >
-        <TextArea value={textValue} onChange={(e) => setTextValue(e.target.value)}></TextArea>
-      </Modal>
+          open={open}
+          title={noteModel ? "录入笔记" : "翻译"}
+          onOk={handleOk}
+          onCancel={handleCancel}
+          footer={[
+            <Button key="submit" type="primary" loading={editLoading} onClick={handleOk}>
+              { noteModel ? "添加" : "编辑" }
+            </Button>,
+          ]}
+        > 
+        <div>
+          <div style={{margin: '20px 0'}}>
+            <Checkbox onChange={(e) => setFormData({...formData, auto: e.target.checked})}>自动翻译</Checkbox>
+          </div>
+          单词 / 句子：<TextArea rows={4} value={formData.text} onChange={(e) => setFormData({...formData, text: e.target.value})}></TextArea>
+          <div style={{margin: '20px 0'}}></div>
+          翻译：<TextArea rows={4} value={formData.translation} onChange={(e) => setFormData({...formData, translation: e.target.value})}></TextArea>
+          <div style={{margin: '20px 0'}}></div>
+          详情：<TextArea rows={4} value={formData.othersTranslation} onChange={(e) => setFormData({...formData, othersTranslation: e.target.value})}></TextArea>
+        </div> 
+        </Modal>
         <TranslateLayer />
-        <SpeakWord quickly interval={interval} words={curWord} onSuccese={audioSuccese}  />
+        <SpeakWord interval={interval} words={curWord} onSuccese={audioSuccese}  />
         <div className={styles.pageWrapper}>
           <div className={styles.header}>
             <Pagination
@@ -214,20 +294,28 @@ export default function Sample() {
               className={styles.pagination}
               showQuickJumper
               pageSize={SIZE}
-              current={curPageNum}
+              current={curPageNum.current}
               total={total}
               onChange={onPageChange}
             />
-            <Button type='primary' onClick={remberHandler} className={styles.remberButton}>
-              记住当前页 {curPageNum}
-            </Button>
             <Button type='link' onClick={allActive} className={styles.remberButton}>
               详情模式
             </Button>
             <Button type='link' onClick={autoRead} className={styles.remberButton}>
               自动阅读
             </Button>
-            <Select value={interval} onChange={setInterval} style={{verticalAlign: 'top', width: '60px'}}>
+            <Button type='link' onClick={goToNote} className={styles.remberButton}>
+              { !noteModel ? '笔记模式' : '单词模式' }
+            </Button>
+            {
+              noteModel && <Button type='primary' onClick={addNewWord} className={styles.remberButton}>
+                添加
+              </Button>
+            }
+            <Button type='primary' onClick={remberHandler} className={styles.remberButton} style={{margin: '0 10px'}}>
+              记住当前页 {curPageNum.current}
+            </Button>
+            <Select title='间隔' value={interval} onChange={setInterval} style={{verticalAlign: 'top', width: '60px'}}>
               <Select.Option value={1000}>1秒</Select.Option>
               <Select.Option value={2000}>2秒</Select.Option>
               <Select.Option value={3000}>3秒</Select.Option>
@@ -242,10 +330,11 @@ export default function Sample() {
                     <p onClick={() => textItemClick(item.text)}>
                       <span className={`${styles['word-text']} new-word-text`}>{item.text}</span>：
                       <Tooltip placement="top" color='#fff' title={<>
-                        <Button size='small' style={{marginRight: '5px'}} onClick={() => edit(item)}>编辑</Button>
-                        <Button size='small' onClick={() => read(item)}>熟悉了</Button>
+                        <Button size='small' onClick={() => edit(item)}>编辑</Button>
+                        <Button size='small' style={{margin: '0 5px'}} onClick={() => read(item)}>熟悉了</Button>
+                        <Button danger size='small' onClick={() => remove(item)}>删除</Button>
                       </>}>
-                        <span onClick={(e) => moreTrans(num, e)}>{item.translation}</span>
+                        <span onClick={(e) => moreTrans(num, e)}>{item.translation || '-'}</span>
                       </Tooltip>
                     </p>
                     <div className={`${styles['word-extra']}`} style={{display: item.active ? 'block' : 'none'}}>
@@ -254,7 +343,7 @@ export default function Sample() {
                           <div key={index} className={styles['word-extra--active']}>{i}</div>
                         ))
                       }
-                      <div className={styles['dashed-border']}></div>
+                      { (item.othersTranslation.length && item.extra.length) ? <div className={styles['dashed-border']}></div> : null }
                       {
                         item.extra.map((i: any, index: number) => (
                           <div key={index} className={styles['word-extra--extra']}>{i}</div>
@@ -267,6 +356,7 @@ export default function Sample() {
             </div>
           </div>
         </div>
+      
       </div>
     // </Spin>
   );

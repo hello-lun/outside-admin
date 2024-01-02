@@ -14,6 +14,10 @@ export const addNewWord = (data?: any) => {
   return http<any>({method: 'post', url: '/novel/sava-word', data });
 };
 
+export const removeNewWord = (data?: any) => {
+  return http<any>({method: 'get', url: '/novel/remove-word', data });
+};
+
 export const editNewWord = (data?: any) => {
   return http<any>({method: 'post', url: '/novel/edit-word', data });
 };

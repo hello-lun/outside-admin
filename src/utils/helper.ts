@@ -62,3 +62,18 @@ export function sleep(time = 1000) {
     setTimeout(r, time);
   });
 }
+
+export function catchJsonExep(data: any, type?: string) {
+  let transformData = data;
+  try {
+    if (type === 'parse') {
+      transformData = JSON.parse(data);
+    } else {
+      transformData = JSON.stringify(data);
+    }
+  } catch(e) {
+    console.error(e);
+  }
+
+  return transformData;
+}

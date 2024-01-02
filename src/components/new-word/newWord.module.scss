@@ -68,3 +68,18 @@
     color: green;
   }
 }
+
+.newWord-example {
+  margin: 0;
+  padding: 5px 0;
+  transition: opacity 1s ease; 
+  &:hover {
+    .newWord-example-translate {
+      opacity: 1;
+    }
+  }
+}
+
+.newWord-example-translate {
+  opacity: 0;
+}
