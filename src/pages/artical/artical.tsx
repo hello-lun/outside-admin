@@ -27,6 +27,14 @@ interface AnyObject {
   [key: string]: any;
 }
 
+interface IExtraData {
+  strong: boolean,
+  example: string,
+  translate: string,
+  text?: string,
+  index?: number,
+}
+
 const defaultFormData = {
   title: '',
   text: '',
@@ -279,8 +287,17 @@ export default function Artical() {
     transFlag = false;
   }
 
+  function formatExtraData(data: IExtraData) {
+    return catchJsonExep({
+      strong: data.strong,
+      example: data.example,
+      translate: data.translate,
+    });
+  }
+
+
   async function createdExtraData(text: string) {
-    const extraData: { strong: boolean, example: string, translate: string } = {
+    const extraData: IExtraData = {
       strong: false,
       example: '',
       translate: '',
@@ -307,14 +324,14 @@ export default function Artical() {
     const text = curWord[0];
     // 额外的数据
     const [, extraData] = await catchError(createdExtraData(text));
-    console.log('extraData: ', extraData);
     tempNewWords.add(`${text}：${translateText}@${catchJsonExep(extraData)}`);
     const data = Array.from(tempNewWords);
     newWordHandler(data);
   }
 
-  function modalOkHandler({index, text}: {index: number, text: string}) {
-    const removeStr = newWords.splice(index, 1, text);
+  function modalOkHandler(data: IExtraData) {
+    const text = `${data.text}@${formatExtraData(data)}`
+    const removeStr = newWords.splice(data.index as number, 1, text);
     if (removeStr) {
       const newList = [...newWords];
       newWordHandler(newList);

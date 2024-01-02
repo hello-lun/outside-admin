@@ -12,6 +12,14 @@ interface NewWordProps {
   onMarkStrong?: (index: number, data: any) => void;
 }
 
+interface IWord {
+  value: string,
+  show: boolean,
+  strong: boolean,
+  example: string,
+  translate: string,
+}
+
 const { TextArea } = Input;
 
 const NewWord: React.FunctionComponent<NewWordProps> = (props) => {
@@ -19,17 +27,11 @@ const NewWord: React.FunctionComponent<NewWordProps> = (props) => {
   const [curWord, setCurWord] = useState<string[]>([]);
   const audioRef = useRef<AudioComponentMethods>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [wordValue, steWordValue] = useState<{ text: string; index: number }>({
+  const [wordValue, steWordValue] = useState({
     text: '',
     index: 0
   });
-  const [newWords, setNewWords] = useState<{
-    value: string,
-    show: boolean,
-    strong: boolean,
-    example: string,
-    translate: string,
-  }[]>([]);
+  const [newWords, setNewWords] = useState<IWord[]>([]);
 
   useEffect(() => {
     setNewWords(props.data?.map((item) => {
@@ -127,11 +129,12 @@ const NewWord: React.FunctionComponent<NewWordProps> = (props) => {
     });
   }
 
-  function editNewWord(data: string, index: number, e: any) {
+  function editNewWord(data: any, index: number, e: any) {
     e.stopPropagation();
     setIsModalOpen(true);
     steWordValue({
-      text: data,
+      ...data,
+      text: data.value,
       index
     });
   }
@@ -152,7 +155,7 @@ const NewWord: React.FunctionComponent<NewWordProps> = (props) => {
 
   return <div className={styles.newWordWrapper}>
     <SpeakWord words={curWord} interval={1000} onSuccese={audioSuccese} ref={audioRef} />
-    <Modal title='修改单词' open={isModalOpen} onOk={modalOkHandler} onCancel={() => setIsModalOpen(false)}>
+      <Modal title='修改单词' open={isModalOpen} onOk={modalOkHandler} onCancel={() => setIsModalOpen(false)}>
         <TextArea rows={4} value={wordValue.text} onChange={textChange} />
       </Modal>
     <h3>
@@ -181,7 +184,7 @@ const NewWord: React.FunctionComponent<NewWordProps> = (props) => {
                 }
                 {item.show ? <span>：<span>{textArr[1]}</span></span> : null}
                 <MinusCircleOutlined style={{ color: 'red' }} onClick={(e) => removeNewWord(key, e)} />
-                <EditOutlined className={styles.editNewWord} onClick={e => editNewWord(item.value, key, e)} />
+                <EditOutlined className={styles.editNewWord} onClick={e => editNewWord(item, key, e)} />
                 <FontColorsOutlined onClick={(e) => markStrong(key, item, e)} />
               </p>
             );
