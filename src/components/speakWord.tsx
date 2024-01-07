@@ -117,7 +117,7 @@ const SpeakWord: React.ForwardRefRenderFunction<AudioComponentMethods, AudioComp
     } else {
       const word = audioListRef.current.shift() || '';
       if (!word) return;
-      setSpeakWordUrl(`http://dict.youdao.com/dictvoice?audio=${word}`);
+      setSpeakWordUrl(new String(`http://dict.youdao.com/dictvoice?audio=${word}`) as string);
     }
   }, [props.words]);
 

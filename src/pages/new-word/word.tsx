@@ -1,8 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './word.module.scss';
-import { Pagination, Button, Input, Select, Tooltip, Modal, Checkbox } from 'antd';
-import { useOnceEffect } from '@/hooks/onceEffect';
-import { translatePDF, savePDFDetail, getPDFMarkDetail } from '../../service/translate';
+import {
+  Pagination,
+  Button,
+  Input, 
+  Select,
+  Tooltip,
+  Modal,
+  Checkbox,
+  Radio,
+  Dropdown,
+  Space
+} from 'antd';
+import type { MenuProps } from 'antd';
+import { DownOutlined, SmileOutlined } from '@ant-design/icons';
 import SpeakWord from '@/components/speakWord';
 import { useNavigate } from 'react-router-dom';
 import TranslateLayer from '@/components/translateLayer/translateLayer';
@@ -41,6 +52,8 @@ type IFormData = {
   text?: string;
   translation?: string
   othersTranslation?: string
+  type: string, // word
+  label: string
 }
 
 let itemData: any = null;
@@ -50,6 +63,26 @@ function useRequest<T>(p: (data: any) => Promise<T>, configs: any) {
 
   return [res, configs]
 }
+
+const defaultNewWordFormData = {
+  text: '',
+  translation: '',
+  othersTranslation: '',
+  auto: true,
+  type: 'sentence', // word
+  label: 'memory', // pronunciation
+};
+
+const wordTypeMap: any = {
+  memory: {
+    value: '记忆',
+    color: '#9c8af4'
+  },
+  pronunciation: {
+    value: '发音',
+    color: '#f08597'
+  },
+};
 
 export default function Sample() {
   const [total, setTotal] = useState<number>(0);
@@ -62,23 +95,64 @@ export default function Sample() {
   const [noteModel, setNoteModel] = useState(false);
   const [open, setOpen] = useState(false);
   const [editLoading, setEitLoading] = useState(false);
-  const [formData, setFormData] = useState<IFormData>({
-    text: '',
-    translation: '',
-    othersTranslation: ''
-  });
+  const [formData, setFormData] = useState<IFormData>({...defaultNewWordFormData});
   const curReadIndex = useRef(0);
   const userData = useUserStore.getState();
   const curPageNum = useRef<number>(1);
+  const [searcheData, setSearcheData] = useState<{
+    type: string | null,
+    label: string | null,
+  }>({
+    type: 'word',
+    label: 'memory',
+  });
+
+  const dropdownItems: MenuProps['items'] = [
+    {
+      key: '1',
+      label: (
+        <div>
+          类型：
+          <Radio.Group onChange={(e) => setSearcheData({...searcheData, type: e.target.value})} value={searcheData.type}>
+            <Radio value='sentence'>句子</Radio>
+            <Radio value='word'>单词</Radio>
+          </Radio.Group>
+        </div>
+      ),
+    },
+    {
+      key: '2',
+      label: (
+        <div>
+          标注：
+          <Radio.Group onChange={(e) => setSearcheData({...searcheData, label: e.target.value})} value={searcheData.label}>
+            <Radio value='pronunciation'>发音</Radio>
+            <Radio value='memory'>记忆</Radio>
+          </Radio.Group>
+        </div>
+      ),
+    },
+    {
+      key: '3',
+      label: (
+        <Button size='small' onClick={() => setSearcheData({label: null, type: null})}>清空</Button>
+      ),
+    },
+  ];
+
 
   const getNewWords = async (note?: boolean) => {
     setPaginationDisabled(true);
     try {
+      const isNote = (note !== void 0 ? note : noteModel) ? 1 : 0;
       const res = await getNewWord({
         page: curPageNum.current,
         size: SIZE,
         isRead: 0,
-        isNote: (note !== void 0 ? note : noteModel) ? 1 : 0,
+        isNote,
+        type: isNote ? searcheData.type : null,
+        label: isNote ? searcheData.label : null,
+        userId: isNote ? userData.user.currentUser.id : null,
       });
       const list = res?.list.map((item: any) => {
         return {
@@ -98,6 +172,10 @@ export default function Sample() {
   useEffect(() => {
     if (!open) itemData = null;
   }, [open]);
+
+  useEffect(() => {
+    noteModel && getNewWords();
+  }, [searcheData]);
 
   useEffect(() => {
     curPageNum.current = localStorageGetter('englishNewWordInfo', 'wordCurrentPage') || 1;
@@ -220,14 +298,14 @@ export default function Sample() {
       });
       getNewWords();
       setOpen(false);
-      setFormData({});
+      setFormData({...defaultNewWordFormData});
     } finally {
       setEitLoading(false);
     }
   }
   const handleCancel = () => {
     setOpen(false);
-    setFormData({});
+    setFormData({...defaultNewWordFormData});
   }
 
   const edit = (data: any) => {
@@ -259,6 +337,13 @@ export default function Sample() {
     getNewWords();
   }
 
+  const lableChange = () => {
+
+  }
+
+  const typeChange = () => {
+
+  }
 
   return (
     // <Spin tip='文档加载中...' spinning={spinning}>
@@ -276,7 +361,21 @@ export default function Sample() {
         > 
         <div>
           <div style={{margin: '20px 0'}}>
-            <Checkbox onChange={(e) => setFormData({...formData, auto: e.target.checked})}>自动翻译</Checkbox>
+            <Checkbox checked={formData.auto} onChange={(e) => setFormData({...formData, auto: e.target.checked})}>自动翻译</Checkbox>
+          </div>
+          <div style={{margin: '20px 0'}}>
+            类型：
+            <Radio.Group onChange={(e) => setFormData({...formData, type: e.target.value})} value={formData.type}>
+              <Radio value='sentence'>句子</Radio>
+              <Radio value='word'>单词</Radio>
+            </Radio.Group>
+          </div>
+          <div style={{margin: '20px 0'}}>
+            标注：
+            <Radio.Group onChange={(e) => setFormData({...formData, label: e.target.value})} value={formData.label}>
+              <Radio value='pronunciation'>发音</Radio>
+              <Radio value='memory'>记忆</Radio>
+            </Radio.Group>
           </div>
           单词 / 句子：<TextArea rows={4} value={formData.text} onChange={(e) => setFormData({...formData, text: e.target.value})}></TextArea>
           <div style={{margin: '20px 0'}}></div>
@@ -307,10 +406,17 @@ export default function Sample() {
             <Button type='link' onClick={goToNote} className={styles.remberButton}>
               { !noteModel ? '笔记模式' : '单词模式' }
             </Button>
-            {
-              noteModel && <Button type='primary' onClick={addNewWord} className={styles.remberButton}>
-                添加
-              </Button>
+            { 
+              noteModel && <>
+                <Dropdown menu={{ items: dropdownItems }}>
+                  <Button type='link' onClick={autoRead} className={styles.remberButton}>
+                    更多搜索
+                  </Button>
+                </Dropdown>
+                <Button type='primary' onClick={addNewWord} className={styles.remberButton}>
+                  添加
+                </Button>
+              </>
             }
             <Button type='primary' onClick={remberHandler} className={styles.remberButton} style={{margin: '0 10px'}}>
               记住当前页 {curPageNum.current}
@@ -327,6 +433,7 @@ export default function Sample() {
               {
                 words.map((item: any, num: number) => (
                   <div className={styles['word-item']} key={item.id}>
+                    { item.label ? <span className={styles['word-label']} style={{backgroundColor: wordTypeMap[item.label]?.color}}>{wordTypeMap[item.label]?.value}</span> : null }
                     <p onClick={() => textItemClick(item.text)}>
                       <span className={`${styles['word-text']} new-word-text`}>{item.text}</span>：
                       <Tooltip placement="top" color='#fff' title={<>
@@ -334,7 +441,7 @@ export default function Sample() {
                         <Button size='small' style={{margin: '0 5px'}} onClick={() => read(item)}>熟悉了</Button>
                         <Button danger size='small' onClick={() => remove(item)}>删除</Button>
                       </>}>
-                        <span onClick={(e) => moreTrans(num, e)}>{item.translation || '-'}</span>
+                        <span onClick={(e) => moreTrans(num, e)} style={{color: '#326c38'}}>{item.translation || '-'}</span>
                       </Tooltip>
                     </p>
                     <div className={`${styles['word-extra']}`} style={{display: item.active ? 'block' : 'none'}}>

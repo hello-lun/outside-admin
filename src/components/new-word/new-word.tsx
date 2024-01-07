@@ -85,7 +85,6 @@ const NewWord: React.FunctionComponent<NewWordProps> = (props) => {
     const word = text.split('：')[0];
     setCurWord([word]);
     props.newWordItemClick && props.newWordItemClick(e, text);
-
     setNewWords(newWords.map((item, i) => {
       return index === i ? {
         ...item,

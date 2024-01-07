@@ -379,7 +379,7 @@ export default function Artical() {
           strong: false,
         };
         return {
-          value: item.split('#')?.[0]?.split('：'),
+          value: strs[0]?.split('#')?.[0]?.split('：'),
           ...extraData,
         };
       });

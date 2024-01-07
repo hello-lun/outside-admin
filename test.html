@@ -1,34 +1,37 @@
-<button id="speakButton">Speak</button>
-<script>
-  // 输入字符串
-let inputString = 'a dsf vdfvdfvdf svdsfvd frhbd svd';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grid Layout</title>
+  <style>
+    .wrapper {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 1fr);
+      gap: 10px;
+    }
 
-// 动态变量
-let dynamicVariable = 'svd';
+    .item {
+      background-color: lightgray;
+      border: 1px solid gray;
+      box-sizing: border-box;
+      overflow: hidden; /* 防止内容溢出 */
+    }
 
-// 创建动态 RegExp 对象
-let pattern = new RegExp(`\\b${dynamicVariable}\\b`, 'g');
+    .item p {
+      margin: 0;
+    }
 
-// 使用 RegExp 对象进行替换
-let result = inputString.replace(pattern, 'ding');
-
-// 输出结果
-console.log(result, 89);
-
-// 输入字符串
-// let inputString = 'a dsf vdfvdfvdf svdsfvd frhbd bsvd';
-
-// // 动态变量
-// let dynamicVariable = 'bsvd';
-
-// // 创建动态 RegExp 对象
-// let pattern = new RegExp(`\\b${dynamicVariable}\\b`, 'g');
-
-// // 使用 RegExp 对象进行替换
-// let result = inputString.replace(pattern, 'ding');
-
-// // 输出结果
-// console.log(result);
-
-
-</script>
+    .item span {
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="item"><p><span>xvdv</span><span>:dvfdf</span></p></div>
+    <div class="item"><p><span>xvdfv35345345345345345345dfv</span><span>:dvdfvf3435435345345dvfdvdf</span></p></div>
+    <div class="item"><p><span>xvdf35345vdfv</span><span>:dvd535fvf534dvfdvdf</span></p></div>
+  </div>
+</body>
+</html>
